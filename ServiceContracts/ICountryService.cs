@@ -4,6 +4,8 @@ namespace ServiceContracts
 {
     public interface ICountryService
     {
-        CountryAddResponse Add(CountryAddRequest countryAddRequest);
+        CountryResponse Add(CountryAddRequest countryAddRequest);
+        IEnumerable<CountryResponse> GetAll();
+        CountryResponse? GetById(Guid id);
     }
 }
