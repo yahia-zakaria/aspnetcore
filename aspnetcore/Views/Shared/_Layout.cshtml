@@ -3,11 +3,21 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>@ViewBag.Title</title>
+	<title>@ViewBag.Title</title>
+	<link href="~/css/site.css" rel="stylesheet" />
+	<link href="~/css/fontawesome.css" rel="stylesheet" />
 </head>
 <body>
-    <div>
-        @RenderBody()
-    </div>
+	<div class="container">
+		<div class="navbar">
+			<div class="navbar-brand">CRUD Operations Demo</div>
+			<ul>
+				<li><a asp-action="Index" asp-controller="Persons">Persons</a></li>
+			</ul>
+		</div>
+		<div class="page-content">
+			@RenderBody()
+		</div>
+	</div>
 </body>
 </html>

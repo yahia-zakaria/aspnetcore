@@ -124,15 +124,15 @@ namespace CrudTests
         #endregion
 
         #region GetAll
-        //when we call GetAll() we should receive a non-empty list of countries
+        //when we call GetAll() we should receive empty list of countries
         [Fact]
-        public void GetAll_ReceiveNonEmptyList()
+        public void GetAll_ReceiveEmptyList()
         {
             //Act
             List<CountryResponse> countries = _countryService.GetAll().ToList();
 
             //Arrange 
-            Assert.NotEmpty(countries);
+            Assert.Empty(countries);
         }
         #endregion
 

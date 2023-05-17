@@ -41,16 +41,10 @@ namespace ServiceContracts.DTO
                 &&  Age == other.Age && CountryId == other.CountryId && Address == other.Address && ReceiveNewsLetters == other.ReceiveNewsLetters; 
         }
 
-        //public int? CalculateAge(DateTime? dateOfBirth)
-        //{
-        //    if (DateOfBirth is not null)
-        //    {
-        //        return (int)Math.Round((DateTime.Now - DateOfBirth.Value).TotalDays / 365.25);
-        //    }
-        //    else
-        //    {
-        //        return null;
-        //    }
-        //}
+        public override string ToString()
+        {
+            return $"PersonId: {Id}, PersonName: {PersonName}, Email: {Email}, Date of Birth: {DateOfBirth}," +
+                $" Age: {Age}, Country: {Country}, Address: {Address}, Receive News Letters: {ReceiveNewsLetters}";
+        }
     }
 }

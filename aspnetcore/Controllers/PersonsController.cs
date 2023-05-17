@@ -2,7 +2,7 @@
 
 namespace aspnetcore.Controllers
 {
-    public class HomeController : Controller
+    public class PersonsController : Controller
     {
         public IActionResult Index()
         {
