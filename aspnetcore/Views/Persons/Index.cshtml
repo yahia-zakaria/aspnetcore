@@ -1,5 +1,35 @@
-﻿
+﻿@model IEnumerable<PersonResponse>
 @{
 	ViewBag.Title = "Index";
 }
 <h1>Persons</h1>
+
+<table class="table mt w-100">
+	<thead>
+		<tr>
+			<th>@Html.DisplayNameFor(m=>m.PersonName)</th>
+			<th>@Html.DisplayNameFor(m=>m.Email)</th>
+			<th>@Html.DisplayNameFor(m=>m.DateOfBirth)</th>
+			<th>@Html.DisplayNameFor(m=>m.Age)</th>
+			<th>@Html.DisplayNameFor(m=>m.Gender)</th>
+			<th>@Html.DisplayNameFor(m=>m.Address)</th>
+			<th>@Html.DisplayNameFor(m=>m.Country)</th>
+			<th>@Html.DisplayNameFor(m=>m.ReceiveNewsLetters)</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var person in Model)
+		{
+			<tr>
+				<td>@person.PersonName</td>
+				<td>@person.Email</td>
+				<td>@person.DateOfBirth?.ToString("dd MMMM yyyy")</td>
+				<td>@person.Age</td>
+				<td>@person.Gender</td>
+				<td>@person.Address</td>
+				<td>@person.Country</td>
+				<td>@person.ReceiveNewsLetters</td>
+			</tr>
+		}
+	</tbody>
+</table>

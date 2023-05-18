@@ -11,10 +11,22 @@ namespace Services
         readonly List<Country> _countries;
         private readonly IMapper mapper;
 
-        public CountryService(IMapper mapper)
+        public CountryService(IMapper mapper, bool initialize = true)
         {
             _countries = new();
             this.mapper = mapper;
+            if (initialize)
+            {
+                _countries.AddRange(
+                    new List<Country>() {
+                    new Country { Id = Guid.Parse("A7872C03-9643-47D1-AB56-F603F2ABA8B1"), CountryName = "USA"},
+                    new Country { Id = Guid.Parse("8F1DA55F-7DFB-4CAA-9785-6F901336D6DC"), CountryName = "UK"},
+                    new Country { Id = Guid.Parse("F225CCCA-10C7-44BD-886A-8D0EA28ED1C3"), CountryName = "Austrailia"},
+                    new Country { Id = Guid.Parse("B3E3C9A0-0925-4493-9E24-569C89A58EAD"), CountryName = "Canada"},
+                    new Country { Id = Guid.Parse("079C9AF0-BEA6-4407-B4CB-C960E8CEB4B6"), CountryName = "South Korea"}
+                    }
+					);
+            }
         }
 
         public CountryResponse Add(CountryAddRequest countryAddRequest)

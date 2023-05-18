@@ -23,7 +23,7 @@ namespace CrudTests
         //constructor
         public CountryServiceTest()
         {
-            _countryService = new CountryService(new Mapper(config));
+            _countryService = new CountryService(new Mapper(config), false);
         }
 
         #region AddCountry

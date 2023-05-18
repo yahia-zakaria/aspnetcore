@@ -1,13 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ServiceContracts;
 
 namespace aspnetcore.Controllers
 {
     public class PersonsController : Controller
     {
-        public IActionResult Index()
-        {
+        private readonly IPersonService _personservice;
 
-            return View();
+		public PersonsController(IPersonService personservice)
+		{
+			_personservice = personservice;
+		}
+
+		public IActionResult Index()
+        {
+            var persons = _personservice.GetAll();  
+            return View(persons);
         }
     }
 }

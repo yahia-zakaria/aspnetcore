@@ -1,16 +1,10 @@
 ﻿using AutoMapper;
 using Entities;
 using ServiceContracts.DTO;
-using ServiceContracts.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Services.Mapping
 {
-    public class MappingProfile: Profile
+	public class MappingProfile: Profile
     {
         public MappingProfile()
         {
