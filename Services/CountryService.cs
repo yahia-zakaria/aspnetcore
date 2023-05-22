@@ -9,12 +9,12 @@ namespace Services
     public class CountryService : ICountryService
     {
         readonly List<Country> _countries;
-        private readonly IMapper mapper;
+        private readonly IMapper _mapper;
 
         public CountryService(IMapper mapper, bool initialize = true)
         {
-            _countries = new();
-            this.mapper = mapper;
+            _countries = new List<Country>();
+            _mapper = mapper;
             if (initialize)
             {
                 _countries.AddRange(
@@ -43,21 +43,23 @@ namespace Services
             {
                 throw new ArgumentException("Duplicate country name");
             }
-            var country = mapper.Map<Country>(countryAddRequest);
+            var country = _mapper.Map<Country>(countryAddRequest);
             country.Id = Guid.NewGuid();
              _countries.Add(country);
 
-            return mapper.Map<CountryResponse>(country);
+            return _mapper.Map<CountryResponse>(country);
         }
 
         public IEnumerable<CountryResponse> GetAll()
         {
-            return _countries.Select(country => mapper.Map<CountryResponse>(country));
+            var CountriesResponse = _countries.Select(country => _mapper.Map<CountryResponse>(country));
+
+			return CountriesResponse;
         }
 
         public CountryResponse? GetById(Guid id)
         {
-            return mapper.Map<CountryResponse>(_countries.FirstOrDefault(country => country.Id == id));
+            return _mapper.Map<CountryResponse>(_countries.FirstOrDefault(country => country.Id == id));
         }
     }
 }

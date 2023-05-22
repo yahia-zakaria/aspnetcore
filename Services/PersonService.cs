@@ -21,7 +21,7 @@ namespace Services
 		{
 			_persons = new();
 			_mapper = mapper;
-			_countryService = new CountryService(mapper, false);
+			_countryService = new CountryService(mapper, true);
 			if (initialize)
 			{
 				_persons.AddRange(
@@ -125,18 +125,35 @@ namespace Services
 
 		public List<PersonResponse> GetAll()
 		{
-			return _mapper.Map<List<PersonResponse>>(_persons);
+			var allPersons = _mapper.Map<List<PersonResponse>>(_persons);
+
+			PersonWithCountry(allPersons);
+			return allPersons;
+		}
+
+		private void PersonWithCountry(List<PersonResponse> allPersons)
+		{
+			foreach (var item in allPersons)
+			{
+				item.Country = _countryService.GetById(item.CountryId)?.CountryName;
+			}
 		}
 
 		public PersonResponse GetById(Guid id)
 		{
-			return _mapper.Map<PersonResponse>(_persons.Find(x => x.Id == id));
+			if(id == Guid.Empty)
+				throw new ArgumentNullException("id");
+
+			var person = _mapper.Map<PersonResponse>(_persons.Find(x => x.Id == id));
+			person.Country = _countryService.GetById(person.CountryId)?.CountryName;
+			return person;
 		}
 
 		public List<PersonResponse> GetFilteredPerson(string searchBy, string SearchString)
 		{
-			var allPerson = _mapper.Map<List<PersonResponse>>(_persons.ToList());
-			var matchingPersons = allPerson;
+			var allPersons = _mapper.Map<List<PersonResponse>>(_persons.ToList());
+			PersonWithCountry(allPersons);
+			var matchingPersons = allPersons;
 
 			if (string.IsNullOrWhiteSpace(searchBy))
 				return matchingPersons;
@@ -145,49 +162,49 @@ namespace Services
 			{
 				case nameof(PersonResponse.PersonName):
 					matchingPersons = SearchString != null ?
-					 allPerson.Where(person => person.PersonName.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
+					 allPersons.Where(person => person.PersonName.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
 					   .Select(p => _mapper.Map<PersonResponse>(p))
-					   .ToList() : allPerson;
+					   .ToList() : allPersons;
 					break;
 
 				case nameof(PersonResponse.Email):
 					matchingPersons = SearchString != null ?
-					 allPerson.Where(person => person.Email.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
+					 allPersons.Where(person => person.Email.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
 					   .Select(p => _mapper.Map<PersonResponse>(p))
-					   .ToList() : allPerson;
+					   .ToList() : allPersons;
 					break;
 				case nameof(PersonResponse.Age):
 					matchingPersons = SearchString != null ?
-					 allPerson.Where(person => int.TryParse(SearchString, out int age) ? person.Age == age : person.Age == 0)
+					 allPersons.Where(person => int.TryParse(SearchString, out int age) ? person.Age == age : person.Age == 0)
 					   .Select(p => _mapper.Map<PersonResponse>(p))
-					   .ToList() : allPerson;
+					   .ToList() : allPersons;
 					break;
 
 				case nameof(PersonResponse.DateOfBirth):
 					matchingPersons = SearchString != null ?
-					allPerson.Where(person => (person.DateOfBirth != null) ?
+					allPersons.Where(person => (person.DateOfBirth != null) ?
 					 person.DateOfBirth.Value.ToString("dd MMMM yyyy").Contains(SearchString) : true)
 					   .Select(p => _mapper.Map<PersonResponse>(p))
-					   .ToList() : allPerson;
+					   .ToList() : allPersons;
 					break;
 
 				case nameof(PersonResponse.Gender):
 					matchingPersons = SearchString != null ?
-					 allPerson.Where(person => person.Gender.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
+					 allPersons.Where(person => person.Gender.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
 					   .Select(p => _mapper.Map<PersonResponse>(p))
-					   .ToList() : allPerson;
+					   .ToList() : allPersons;
 					break;
 
 
 				case nameof(PersonResponse.Address):
 					matchingPersons = SearchString != null ?
-					 allPerson.Where(person => person.Gender.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
+					 allPersons.Where(person => person.Gender.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
 					   .Select(p => _mapper.Map<PersonResponse>(p))
-					   .ToList() : allPerson;
+					   .ToList() : allPersons;
 					break;
 
 				default:
-					matchingPersons = allPerson; break;
+					matchingPersons = allPersons; break;
 			}
 
 			return matchingPersons;

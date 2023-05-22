@@ -3,6 +3,7 @@ using Entities;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using Services;
+using Services.Mapping;
 using System.Collections.Generic;
 
 namespace CrudTests
@@ -10,20 +11,16 @@ namespace CrudTests
     public class CountryServiceTest
     {
         private readonly ICountryService _countryService;
-        private MapperConfiguration config = new MapperConfiguration(cfg =>
+        private MapperConfiguration mapperConfiguration = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<CountryAddRequest, Country>();
-            cfg.CreateMap<Country, CountryResponse>();
-            cfg.CreateMap<PersonAddRequest, Person>()
-    .ForMember(dest => dest.Gender, memberOptions => memberOptions.MapFrom(src => src.Gender.ToString()));
-            cfg.CreateMap<Person, PersonResponse>();
-        });
+			cfg.AddProfile(new MappingProfile());
+		});
 
 
         //constructor
         public CountryServiceTest()
         {
-            _countryService = new CountryService(new Mapper(config), false);
+            _countryService = new CountryService(mapperConfiguration.CreateMapper(), false);
         }
 
         #region AddCountry

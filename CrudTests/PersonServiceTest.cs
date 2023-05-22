@@ -7,24 +7,21 @@ using ServiceContracts.Enums;
 using AutoMapper;
 using Entities;
 using Xunit.Sdk;
+using Services.Mapping;
 
 namespace CrudTests
 {
     public class PersonServiceTest
     {
         private readonly IPersonService _personService;
-        private MapperConfiguration config = new MapperConfiguration(cfg =>
+        private MapperConfiguration mapperConfiguration = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<CountryAddRequest, Country>();
-            cfg.CreateMap<Country, CountryResponse>();
-            cfg.CreateMap<PersonAddRequest, Person>()
-            .ForMember(dest => dest.Gender, memberOptions => memberOptions.MapFrom(src => src.Gender.ToString()));
-            cfg.CreateMap<Person, PersonResponse>();
-        });
+			cfg.AddProfile(new MappingProfile());
+		});
 
         public PersonServiceTest()
         {
-            _personService = new PersonService(new Mapper(config));
+            _personService = new PersonService(mapperConfiguration.CreateMapper(), false);
         }
 
         #region Add
@@ -95,11 +92,11 @@ namespace CrudTests
             //arrange
             var person = new Person() { Id = Guid.Empty };
 
-            //act
-            var personResponse = _personService.GetById(person.Id);
-
             //assert
-            Assert.Null(personResponse);
+            Assert.Throws<ArgumentNullException>(() =>{
+				//act
+				var personResponse = _personService.GetById(person.Id);
+			});
 
         }
 
