@@ -1,0 +1,17 @@
+﻿@if (ViewBag.currentSortBy == ViewBag.ColumnName && ViewBag.currentSortDir == SortOptions.ASCENDING)
+{
+	<a href="~/Persons/Index?searchBy=@ViewBag.currentSearchBy&searchString=@ViewBag.currentSearchString
+						&sortBy=@ViewBag.ColumnName&sortDir=@SortOptions.DESCENDING.ToString()">@ViewBag.DisplayName</a>
+	<i class="fa-solid fa-sort-up"></i>
+}
+else if (ViewBag.currentSortBy == ViewBag.ColumnName && ViewBag.currentSortDir == SortOptions.DESCENDING)
+{
+	<a href="~/Persons/Index?searchBy=@ViewBag.currentSearchBy&searchString=@ViewBag.currentSearchString
+						&sortBy=@ViewBag.ColumnName&sortDir=@SortOptions.ASCENDING.ToString()">@ViewBag.DisplayName</a>
+	<i class="fa-solid fa-sort-down"></i>
+}
+else
+{
+	<a href="~/Persons/Index?searchBy=@ViewBag.currentSearchBy&searchString=@ViewBag.currentSearchString
+						&sortBy=@ViewBag.ColumnName&sortDir=@SortOptions.ASCENDING.ToString()">@ViewBag.DisplayName</a>
+}

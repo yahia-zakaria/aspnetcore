@@ -144,41 +144,46 @@ namespace Services
 			switch (searchBy)
 			{
 				case nameof(PersonResponse.PersonName):
-					matchingPersons = allPerson.Where(person => person.PersonName.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
+					matchingPersons = SearchString != null ?
+					 allPerson.Where(person => person.PersonName.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
 					   .Select(p => _mapper.Map<PersonResponse>(p))
-					   .ToList();
+					   .ToList() : allPerson;
 					break;
 
 				case nameof(PersonResponse.Email):
-					matchingPersons = allPerson.Where(person => person.Email.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
+					matchingPersons = SearchString != null ?
+					 allPerson.Where(person => person.Email.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
 					   .Select(p => _mapper.Map<PersonResponse>(p))
-					   .ToList();
+					   .ToList() : allPerson;
 					break;
 				case nameof(PersonResponse.Age):
-					//int age = 0;
-					matchingPersons = allPerson.Where(person => int.TryParse(SearchString, out int age) ? person.Age == age : person.Age == 0)
+					matchingPersons = SearchString != null ?
+					 allPerson.Where(person => int.TryParse(SearchString, out int age) ? person.Age == age : person.Age == 0)
 					   .Select(p => _mapper.Map<PersonResponse>(p))
-					   .ToList();
+					   .ToList() : allPerson;
 					break;
 
 				case nameof(PersonResponse.DateOfBirth):
-					matchingPersons = allPerson.Where(person => (person.DateOfBirth != null) ?
+					matchingPersons = SearchString != null ?
+					allPerson.Where(person => (person.DateOfBirth != null) ?
 					 person.DateOfBirth.Value.ToString("dd MMMM yyyy").Contains(SearchString) : true)
 					   .Select(p => _mapper.Map<PersonResponse>(p))
-					   .ToList();
+					   .ToList() : allPerson;
 					break;
 
 				case nameof(PersonResponse.Gender):
-					matchingPersons = allPerson.Where(person => person.Gender.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
+					matchingPersons = SearchString != null ?
+					 allPerson.Where(person => person.Gender.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
 					   .Select(p => _mapper.Map<PersonResponse>(p))
-					   .ToList();
+					   .ToList() : allPerson;
 					break;
 
 
 				case nameof(PersonResponse.Address):
-					matchingPersons = allPerson.Where(person => person.Gender.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
+					matchingPersons = SearchString != null ?
+					 allPerson.Where(person => person.Gender.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
 					   .Select(p => _mapper.Map<PersonResponse>(p))
-					   .ToList();
+					   .ToList() : allPerson;
 					break;
 
 				default:
@@ -190,7 +195,7 @@ namespace Services
 
 		public List<PersonResponse> GetSortedPersons(List<PersonResponse> persons, string sortBy, SortOptions sortDir)
 		{
-			var allPerson = _mapper.Map<List<PersonResponse>>(_persons.ToList());
+			var allPerson = persons;
 
 			if (sortBy is null)
 				return allPerson;
@@ -233,6 +238,12 @@ namespace Services
 				allPerson.OrderBy(person => person.Address).ToList(),
 				(nameof(PersonResponse.Address), SortOptions.DESCENDING) =>
 				allPerson.OrderByDescending(person => person.Address).ToList(),
+
+				(nameof(PersonResponse.ReceiveNewsLetters), SortOptions.ASCENDING) =>
+				allPerson.OrderBy(person => person.ReceiveNewsLetters).ToList(),
+				(nameof(PersonResponse.ReceiveNewsLetters), SortOptions.DESCENDING) =>
+				allPerson.OrderByDescending(person => person.ReceiveNewsLetters).ToList(),
+
 			};
 
 			return sortedPersons;
