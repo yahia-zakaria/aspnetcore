@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Entities;
+using Microsoft.EntityFrameworkCore;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
@@ -14,145 +16,65 @@ namespace Services
 {
 	public class PersonService : IPersonService
 	{
-		private readonly List<Person> _persons;
 		private readonly ICountryService _countryService;
+		private readonly PersonsDbContext _db;
 		private readonly IMapper _mapper;
-		public PersonService(IMapper mapper, bool initialize = true)
+		public PersonService(PersonsDbContext db, IMapper mapper, ICountryService countryService)
 		{
-			_persons = new();
+			_db = db;
 			_mapper = mapper;
-			_countryService = new CountryService(mapper, true);
-			if (initialize)
-			{
-				_persons.AddRange(
-					new List<Person>
-					{
-						new Person
-						{
-							Id = Guid.Parse("6D875B26-7ED8-4353-AC1D-B61091F47FA9"),
-							PersonName = "Yahia Zakaria",
-							Email = "a@a.com",
-							Address = "UK Liverpool",
-							CountryId = Guid.Parse("8F1DA55F-7DFB-4CAA-9785-6F901336D6DC"),
-							DateOfBirth = DateTime.Parse("1995/06/10"),
-							Gender = GenderOptions.Male.ToString(),
-							ReceiveNewsLetters = true
-						},
-						new Person
-						{
-							Id = Guid.Parse("337E4125-3830-4E62-91B0-CABF0752B3D4"),
-							PersonName = "Ali Osman",
-							Email = "b@b.com",
-							Address = "USA, Washitone DC",
-							CountryId = Guid.Parse("A7872C03-9643-47D1-AB56-F603F2ABA8B1"),
-							DateOfBirth = DateTime.Parse("2002/03/10"),
-							Gender = GenderOptions.Male.ToString(),
-							ReceiveNewsLetters = true
-						},
-						new Person
-						{
-							Id = Guid.Parse("C58DC233-6A37-42B8-BDE1-A8B9A2420A09"),
-							PersonName = "Naif Ahmed",
-							Email = "n@n.com",
-							Address = "Australia melbourne",
-							CountryId = Guid.Parse("F225CCCA-10C7-44BD-886A-8D0EA28ED1C3"),
-							DateOfBirth = DateTime.Parse("2000/08/10"),
-							Gender = GenderOptions.Male.ToString(),
-							ReceiveNewsLetters = true
-						},
-						new Person
-						{
-							Id = Guid.Parse("E4D8086F-838C-42E4-8F51-50C4C2975CB5"),
-							PersonName = "Gidaa Zakaria",
-							Email = "d@d.com",
-							Address = "Australia melbourne",
-							CountryId = Guid.Parse("F225CCCA-10C7-44BD-886A-8D0EA28ED1C3"),
-							DateOfBirth = DateTime.Parse("1981/01/10"),
-							Gender = GenderOptions.Female.ToString(),
-							ReceiveNewsLetters = true
-						},
-						new Person
-						{
-							Id = Guid.Parse("60C318D6-94F0-4424-8D0D-C076E6AACD4F"),
-							PersonName = "Anna Ahmed",
-							Email = "c@c.com",
-							Address = "Canada, Ontario",
-							CountryId = Guid.Parse("B3E3C9A0-0925-4493-9E24-569C89A58EAD"),
-							DateOfBirth = DateTime.Parse("1982/10/10"),
-							Gender = GenderOptions.Female.ToString(),
-							ReceiveNewsLetters = true
-						},
-						new Person
-						{
-							Id = Guid.Parse("64CE3461-96B5-4F6E-A091-7464D78F8142"),
-							PersonName = "Aiham Khidr",
-							Email = "k@k.com",
-							Address = "South Korea, Seoul",
-							CountryId = Guid.Parse("079C9AF0-BEA6-4407-B4CB-C960E8CEB4B6"),
-							DateOfBirth = DateTime.Parse("1993/10/10"),
-							Gender = GenderOptions.Male.ToString(),
-							ReceiveNewsLetters = true
-						}
-				});
-			}
+			_countryService = countryService;
 		}
 
-		public PersonResponse Add(PersonAddRequest person)
+		public async Task<PersonResponse> Add(PersonAddRequest person)
 		{
 			if (person == null) throw new ArgumentNullException(nameof(person));
 			if (person.PersonName is null) throw new ArgumentException(nameof(person.PersonName));
 
 			var personToAdd = _mapper.Map<Person>(person);
 			personToAdd.Id = Guid.NewGuid();
-			_persons.Add(personToAdd);
+			_db.Persons.Add(personToAdd);
+			await _db.SaveChangesAsync();
 
 			var personResponse = _mapper.Map<PersonResponse>(personToAdd);
-
 			return personResponse;
 		}
 
-		public bool Delete(Guid id)
+		public async Task<bool> Delete(Guid id)
 		{
 			if (id == Guid.Empty)
 				return false;
 
-			var person = _persons.Find(per => per.Id == id);
+			var person = await _db.Persons.FindAsync(id);
+
 			if (person is null)
 				return false;
-			_persons.Remove(person);
+
+			_db.Persons.Remove(person);
+			await _db.SaveChangesAsync();
+
 			return true;
 		}
 
-		public List<PersonResponse> GetAll()
+		public async Task<List<PersonResponse>> GetAll()
 		{
-			var allPersons = _mapper.Map<List<PersonResponse>>(_persons);
-
-			PersonWithCountry(allPersons);
+			var allPersons = await _db.Persons.Include(i=>i.Country).ProjectTo<PersonResponse>(_mapper.ConfigurationProvider).ToListAsync();
 			return allPersons;
 		}
 
-		private void PersonWithCountry(List<PersonResponse> allPersons)
-		{
-			foreach (var item in allPersons)
-			{
-				item.Country = _countryService.GetById(item.CountryId)?.CountryName;
-			}
-		}
 
-		public PersonResponse GetById(Guid id)
+		public async Task<PersonResponse> GetById(Guid id)
 		{
 			if(id == Guid.Empty)
 				throw new ArgumentNullException("id");
 
-			var person = _mapper.Map<PersonResponse>(_persons.Find(x => x.Id == id));
-			person.Country = _countryService.GetById(person.CountryId)?.CountryName;
+			var person = _mapper.Map<PersonResponse>(await _db.Persons.Include(i=>i.Country).FirstOrDefaultAsync(person=>person.Id==id));
 			return person;
 		}
 
-		public List<PersonResponse> GetFilteredPerson(string searchBy, string SearchString)
+		public async Task<List<PersonResponse>> GetFilteredPerson(string searchBy, string SearchString)
 		{
-			var allPersons = _mapper.Map<List<PersonResponse>>(_persons.ToList());
-			PersonWithCountry(allPersons);
+			var allPersons = await GetAll();
 			var matchingPersons = allPersons;
 
 			if (string.IsNullOrWhiteSpace(searchBy))
@@ -198,7 +120,14 @@ namespace Services
 
 				case nameof(PersonResponse.Address):
 					matchingPersons = SearchString != null ?
-					 allPersons.Where(person => person.Gender.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
+					 allPersons.Where(person => person.Address.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
+					   .Select(p => _mapper.Map<PersonResponse>(p))
+					   .ToList() : allPersons;
+					break;
+
+				case nameof(PersonResponse.TIN):
+					matchingPersons = SearchString != null ?
+					 allPersons.Where(person => person.TIN.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
 					   .Select(p => _mapper.Map<PersonResponse>(p))
 					   .ToList() : allPersons;
 					break;
@@ -227,9 +156,9 @@ namespace Services
 				allPerson.OrderByDescending(person => person.PersonName).ToList(),
 
 				(nameof(PersonResponse.Email), SortOptions.ASCENDING) =>
-				allPerson.OrderBy(person => person.PersonName).ToList(),
+				allPerson.OrderBy(person => person.Email).ToList(),
 				(nameof(PersonResponse.Email), SortOptions.DESCENDING) =>
-				allPerson.OrderByDescending(person => person.PersonName).ToList(),
+				allPerson.OrderByDescending(person => person.Email).ToList(),
 
 				(nameof(PersonResponse.DateOfBirth), SortOptions.ASCENDING) =>
 				allPerson.OrderBy(person => person.DateOfBirth).ToList(),
@@ -261,29 +190,34 @@ namespace Services
 				(nameof(PersonResponse.ReceiveNewsLetters), SortOptions.DESCENDING) =>
 				allPerson.OrderByDescending(person => person.ReceiveNewsLetters).ToList(),
 
+				(nameof(PersonResponse.TIN), SortOptions.ASCENDING) =>
+				allPerson.OrderBy(person => person.TIN).ToList(),
+				(nameof(PersonResponse.TIN), SortOptions.DESCENDING) =>
+				allPerson.OrderByDescending(person => person.TIN).ToList(),
+
 			};
 
 			return sortedPersons;
 		}
 
-		public PersonResponse Update(PersonUpdateRequest request)
+		public async Task<PersonResponse> Update(PersonUpdateRequest request)
 		{
 			if (request is null)
 				throw new ArgumentNullException();
 
-			var person = _persons.Find(per => per.Id == request.Id);
+			var person = await _db.Persons.FindAsync(request.Id);
 			if (person == null)
 				throw new ArgumentException("The given ID doesn't exist");
 
 			ValidationHelper.Validate(request);
 
-			person.PersonName = request.PersonName;
-			person.Email = request.Email;
-			person.ReceiveNewsLetters = request.ReceiveNewsLetters;
+			person = _mapper.Map(request, person);
+			await _db.SaveChangesAsync();
 
 			return _mapper.Map<PersonResponse>(person);
 
 
 		}
+
 	}
 }

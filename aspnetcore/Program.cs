@@ -1,4 +1,6 @@
-﻿using ServiceContracts;
+﻿using Entities;
+using Microsoft.EntityFrameworkCore;
+using ServiceContracts;
 using Services;
 using Services.Mapping;
 using System.Reflection;
@@ -8,8 +10,13 @@ var builder = WebApplication.CreateBuilder(args);
 #region ConfigureService
 builder.Services.AddControllersWithViews();
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
-builder.Services.AddSingleton<ICountryService, CountryService>();
-builder.Services.AddSingleton<IPersonService, PersonService>();
+builder.Services.AddScoped<ICountryService, CountryService>();
+builder.Services.AddScoped<IPersonService, PersonService>();
+//DbContext
+builder.Services.AddDbContext<PersonsDbContext>(opt =>
+{
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"));
+});
 #endregion
 
 var app = builder.Build();

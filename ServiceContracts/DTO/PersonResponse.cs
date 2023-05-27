@@ -31,20 +31,22 @@ namespace ServiceContracts.DTO
         public string Country { get; set; }
         public string Address { get; set; }
         public bool ReceiveNewsLetters { get; set; }
+        public string TIN { get; set; }
 
-        public override bool Equals(object obj)
+		public override bool Equals(object obj)
         {
             if(obj == null || !(obj is PersonResponse)) return false;
             PersonResponse other = (PersonResponse)obj;
 
             return Id == other.Id && PersonName == other.PersonName && Email == other.Email && DateOfBirth == other.DateOfBirth 
-                &&  Age == other.Age && CountryId == other.CountryId && Address == other.Address && ReceiveNewsLetters == other.ReceiveNewsLetters; 
+                &&  Age == other.Age && CountryId == other.CountryId && Address == other.Address && ReceiveNewsLetters == other.ReceiveNewsLetters
+                && TIN == other.TIN; 
         }
 
         public override string ToString()
         {
             return $"PersonId: {Id}, PersonName: {PersonName}, Email: {Email}, Date of Birth: {DateOfBirth}," +
-                $" Age: {Age}, Country: {Country}, Address: {Address}, Receive News Letters: {ReceiveNewsLetters}";
+                $" Age: {Age}, Country: {Country}, Address: {Address}, Receive News Letters: {ReceiveNewsLetters}, TaxIdentificationNumber: {TIN}";
         }
     }
 }

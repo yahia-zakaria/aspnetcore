@@ -227,6 +227,10 @@
     padding: 20px;
     text-align: center;
 }
+.center-box{
+    width:70%;
+    margin:auto;
+}
 
 .header {
     background-color: #055c87;

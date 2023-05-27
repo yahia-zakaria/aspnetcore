@@ -1,0 +1,35 @@
+﻿@model PersonResponse
+
+@{
+	ViewBag.title = "Edit Person";
+	var genderOptions = (string[])Enum.GetNames(typeof(GenderOptions));
+}
+
+<h2>Delete Person</h2>
+<h3 class="text-red">Are you do you want to delete it?</h3>
+<div class="center-box">
+	@*Edit form*@
+	<form asp-action="Delete" method="post">
+		<input type="hidden" asp-for="Id" />
+		@*Person name*@
+		<div class="form-field flex">
+			<div class="w-25">
+				<label class="form-label pt" asp-for="PersonName">Person Name</label>
+			</div>
+			<div class="w-25">
+				<input asp-for="PersonName" class="form-input" disabled/>
+			</div>
+		</div>
+
+		@*Submit*@
+		<div class="form-field flex">
+
+			<div class="w-25">
+				<button class="button button-red-back">Delete</button>
+			</div>
+			<div class="w-25">
+				<a asp-action="Index" class="link-hover">Back to Persons List</a>
+			</div>
+		</div>
+	</form>
+</div>

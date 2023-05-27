@@ -22,5 +22,7 @@ namespace Entities
         [Required]
         public string Address { get; set; }
         public bool ReceiveNewsLetters { get; set; } = false;
-    }
+		public string TIN { get; set; }
+		public Country Country { get; set; }
+	}
 }

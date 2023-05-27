@@ -12,11 +12,20 @@ namespace ServiceContracts.DTO
     {
         [Required]
         public Guid Id { get; set; }
-        [Required]
-        public string PersonName { get; set; }
-        [Required]
-        public string Email { get; set; }
-        [Required]
-        public bool ReceiveNewsLetters { get; set; }
-    }
+		[Required]
+		public string PersonName { get; set; }
+		[EmailAddress]
+		public string Email { get; set; }
+		[Required]
+		public DateTime? DateOfBirth { get; set; }
+		[Required]
+		public GenderOptions Gender { get; set; }
+		[Required]
+		public Guid CountryId { get; set; }
+		[Required]
+		public string Address { get; set; }
+		public bool ReceiveNewsLetters { get; set; }
+		[Required]
+		public string TIN { get; set; }
+	}
 }
