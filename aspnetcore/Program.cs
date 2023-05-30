@@ -1,5 +1,6 @@
 ﻿using Entities;
 using Microsoft.EntityFrameworkCore;
+using Rotativa.AspNetCore;
 using ServiceContracts;
 using Services;
 using Services.Mapping;
@@ -17,6 +18,8 @@ builder.Services.AddDbContext<PersonsDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"));
 });
+//Rotativa
+RotativaConfiguration.Setup("wwwroot", wkhtmltopdfRelativePath: "Rotativa");
 #endregion
 
 var app = builder.Build();

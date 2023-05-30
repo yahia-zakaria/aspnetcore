@@ -1,0 +1,44 @@
+﻿@model IEnumerable<PersonResponse>
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment _env;
+@{
+	Layout = null;
+}
+
+<link href="@($"http://{Context.Request.Host}/css/Site.css")" rel="stylesheet" />
+
+<h1 style="text-align:center">Persons</h1>
+
+<table id="example" class="ui celled table" style="width:100%">
+	<thead>
+		<tr>
+			<th>Person Name</th>
+			<th>Email</th>
+			<th>Date of Birth</th>
+			<th>Age</th>
+			<th>Gender</th>
+			<th>Address</th>
+			<th>Country</th>
+			<th>Receive News Letters</th>
+			<th>Tax Indetification Number</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var person in Model)
+		{
+			<tr>
+				<td>@person.PersonName</td>
+				<td>@person.Email</td>
+				<td>@person.DateOfBirth?.ToString("dd MMMM yyyy")</td>
+				<td>@person.Age</td>
+				<td>@person.Gender</td>
+				<td>@person.Address</td>
+				<td>@person.Country</td>
+				<td>@person.ReceiveNewsLetters</td>
+				<td>@person.TIN</td>
+			</tr>
+		}
+	</tbody>
+</table>
+<script>
+
+</script>

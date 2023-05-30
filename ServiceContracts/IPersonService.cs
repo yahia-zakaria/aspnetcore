@@ -13,5 +13,8 @@ namespace ServiceContracts
         Task<PersonResponse> GetById(Guid id);
 		Task<List<PersonResponse>> GetFilteredPerson(string searchBy, string SearchString);
         List<PersonResponse> GetSortedPersons(List<PersonResponse> persons, string sortBy, SortOptions sortDir);
-    }
+        Task<MemoryStream> GetPersonsCSV();
+        Task<MemoryStream> GetPersonsExcel();
+
+	}
 }

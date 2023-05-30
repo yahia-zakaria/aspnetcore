@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Rotativa.AspNetCore;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
 using Services;
+using Rotativa.AspNetCore.Options;
 
 namespace aspnetcore.Controllers
 {
@@ -122,6 +124,28 @@ namespace aspnetcore.Controllers
 			}
 			await _personservice.Delete(id);
 			return RedirectToAction("Index");
+		}
+		public async Task<IActionResult> PersonsPDF()
+		{
+			//Get list of persons
+			List<PersonResponse> persons = await _personservice.GetAll();
+
+			//Return view as pdf
+			return new ViewAsPdf("PersonsPDF", persons, ViewData)
+			{
+				PageMargins = new Margins() { Top = 20, Right = 20, Bottom = 20, Left = 20 },
+				PageOrientation = Orientation.Landscape
+			};
+		}
+		public async Task<IActionResult> PersonsCSV()
+		{
+			MemoryStream memoryStream = await _personservice.GetPersonsCSV();
+			return File(memoryStream, "application/octet-stream", "persons.csv");
+		}
+		public async Task<IActionResult> PersonsExcel()
+		{
+			MemoryStream memoryStream = await _personservice.GetPersonsExcel();
+			return File(memoryStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "persons.xlsx");
 		}
 	}
 }
