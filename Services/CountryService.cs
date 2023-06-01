@@ -13,9 +13,9 @@ namespace Services
     public class CountryService : ICountryService
     {
         private readonly IMapper _mapper;
-		private readonly PersonsDbContext _db;
+		private readonly ApplicationDbContext _db;
 
-		public CountryService(PersonsDbContext db, IMapper mapper)
+		public CountryService(ApplicationDbContext db, IMapper mapper)
         {
             _mapper = mapper;
             _db = db;

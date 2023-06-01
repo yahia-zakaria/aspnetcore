@@ -21,9 +21,9 @@ namespace Services
 	public class PersonService : IPersonService
 	{
 		private readonly ICountryService _countryService;
-		private readonly PersonsDbContext _db;
+		private readonly ApplicationDbContext _db;
 		private readonly IMapper _mapper;
-		public PersonService(PersonsDbContext db, IMapper mapper, ICountryService countryService)
+		public PersonService(ApplicationDbContext db, IMapper mapper, ICountryService countryService)
 		{
 			_db = db;
 			_mapper = mapper;
@@ -62,7 +62,7 @@ namespace Services
 
 		public async Task<List<PersonResponse>> GetAll()
 		{
-			var allPersons = await _db.Persons.Include(i=>i.Country).ProjectTo<PersonResponse>(_mapper.ConfigurationProvider).ToListAsync();
+            var allPersons = await _db.Persons.Include(i=>i.Country).ProjectTo<PersonResponse>(_mapper.ConfigurationProvider).ToListAsync();
 			return allPersons;
 		}
 

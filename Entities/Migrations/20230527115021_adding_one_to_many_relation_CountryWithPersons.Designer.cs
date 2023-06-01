@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Entities.Migrations
 {
-    [DbContext(typeof(PersonsDbContext))]
+    [DbContext(typeof(ApplicationDbContext))]
     [Migration("20230527115021_adding_one_to_many_relation_CountryWithPersons")]
     partial class adding_one_to_many_relation_CountryWithPersons
     {

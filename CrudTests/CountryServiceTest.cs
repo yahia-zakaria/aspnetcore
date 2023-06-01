@@ -1,11 +1,11 @@
 using AutoMapper;
 using Entities;
+using EntityFrameworkCoreMock;
 using Microsoft.EntityFrameworkCore;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using Services;
 using Services.Mapping;
-using System.Collections.Generic;
 
 namespace CrudTests
 {
@@ -21,8 +21,15 @@ namespace CrudTests
         //constructor
         public CountryServiceTest()
         {
-            _countryService = new CountryService(new PersonsDbContext(new DbContextOptionsBuilder<PersonsDbContext>().Options)
-                , mapperConfiguration.CreateMapper());
+            var countries = new List<Country>();
+            var dbContextMock = new DbContextMock<ApplicationDbContext>(
+                new DbContextOptionsBuilder<ApplicationDbContext>().Options);
+
+            var dbContext = dbContextMock.Object;
+
+            dbContextMock.CreateDbSetMock<Country>(entity => entity.Countries, countries);
+
+            _countryService = new CountryService(dbContext, mapperConfiguration.CreateMapper());
         }
 
         #region AddCountry

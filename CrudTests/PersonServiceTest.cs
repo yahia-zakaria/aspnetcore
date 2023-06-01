@@ -1,30 +1,42 @@
 ﻿using ServiceContracts;
-using Xunit;
 using Services;
-using System.Diagnostics.CodeAnalysis;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
 using AutoMapper;
 using Entities;
-using Xunit.Sdk;
 using Services.Mapping;
 using Microsoft.EntityFrameworkCore;
+using EntityFrameworkCoreMock;
+using AutoFixture;
 
 namespace CrudTests
 {
     public class PersonServiceTest
     {
         private readonly IPersonService _personService;
+        private readonly Fixture _fixture;
         private MapperConfiguration mapperConfiguration = new MapperConfiguration(cfg =>
         {
-			cfg.AddProfile(new MappingProfile());
-		});
+            cfg.AddProfile(new MappingProfile());
+        });
 
         public PersonServiceTest()
         {
-        CountryService countryService = new CountryService(new PersonsDbContext(new DbContextOptionsBuilder<PersonsDbContext>().Options), mapperConfiguration.CreateMapper());
+            var countries = new List<Country>();
+            var persons = new List<Person>();
 
-	   _personService = new PersonService(new PersonsDbContext(new DbContextOptionsBuilder<PersonsDbContext>().Options), mapperConfiguration.CreateMapper(), countryService);
+            var dbContextMock = new DbContextMock<ApplicationDbContext>(
+                new DbContextOptionsBuilder<ApplicationDbContext>().Options);
+
+            var dbContext = dbContextMock.Object;
+
+            dbContextMock.CreateDbSetMock<Country>(entity => entity.Countries, countries);
+            dbContextMock.CreateDbSetMock<Person>(entity => entity.Persons, persons);
+
+            CountryService countryService = new CountryService(dbContext, mapperConfiguration.CreateMapper());
+            _personService = new PersonService(dbContext, mapperConfiguration.CreateMapper(), countryService);
+
+            _fixture = new Fixture();
         }
 
         #region Add
@@ -49,7 +61,7 @@ namespace CrudTests
         public async Task Add_NullPersonName()
         {
             //arrange
-            PersonAddRequest? person = new PersonAddRequest { PersonName = null };
+            PersonAddRequest? person = _fixture.Build<PersonAddRequest>().With(temp=>temp.PersonName, null as string).Create();
 
             //assert
             await Assert.ThrowsAsync<ArgumentException>(async () =>
@@ -65,18 +77,10 @@ namespace CrudTests
         public async Task Add_ProperPersonAddRequest()
         {
             //arrange
-            PersonAddRequest? person = new PersonAddRequest
-            {
-                PersonName = "Yahia Zakaria",
-                Email = "a@a.com",
-                Address = "Australia melbourne",
-                CountryId = Guid.NewGuid()
-            ,
-                DateOfBirth = DateTime.Parse("1991/01/10"),
-                Gender = GenderOptions.Male,
-                ReceiveNewsLetters = true,
-                TIN = "ABC12345"
-            };
+            PersonAddRequest? person = _fixture.Build<PersonAddRequest>()
+                .With(temp => temp.Email, "someone1@example.com")
+                .With(temp => temp.TIN, "ABC12345")
+                .Create();
 
             //act
             var personResponse = await _personService.Add(person);
@@ -97,10 +101,11 @@ namespace CrudTests
             var person = new Person() { Id = Guid.Empty };
 
             //assert
-            await Assert.ThrowsAsync<ArgumentNullException>(async () =>{
-				//act
-				var personResponse = await _personService.GetById(person.Id);
-			});
+            await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            {
+                //act
+                var personResponse = await _personService.GetById(person.Id);
+            });
 
         }
 
@@ -118,8 +123,8 @@ namespace CrudTests
                 DateOfBirth = DateTime.Parse("1991/01/10"),
                 Gender = GenderOptions.Male,
                 ReceiveNewsLetters = true,
-				TIN = "ABC12345"
-			};
+                TIN = "ABC12345"
+            };
 
             //act
             var PersonResponseFromAdd = await _personService.Add(personToSearch);
@@ -147,31 +152,15 @@ namespace CrudTests
         public async Task GetAll_AddFewPersons()
         {
             //arrange
-            PersonAddRequest? person1 = new PersonAddRequest
-            {
-                PersonName = "Yahia Zakaria",
-                Email = "a@a.com",
-                Address = "Australia melbourne",
-                CountryId = Guid.NewGuid()
-  ,
-                DateOfBirth = DateTime.Parse("1991/01/10"),
-                Gender = GenderOptions.Male,
-                ReceiveNewsLetters = true,
-				TIN = "ABC12345"
-			};
+            PersonAddRequest? person1 = _fixture.Build<PersonAddRequest>()
+                .With(temp => temp.Email, "someone1@example.com")
+                .With(temp => temp.TIN, "ABC12345")
+                .Create();
 
-            PersonAddRequest? person2 = new PersonAddRequest
-            {
-                PersonName = "Ahmed Ali",
-                Email = "a@a.com",
-                Address = "Australia melbourne",
-                CountryId = Guid.NewGuid()
-,
-                DateOfBirth = DateTime.Parse("1993/01/10"),
-                Gender = GenderOptions.Male,
-                ReceiveNewsLetters = true,
-				TIN = "ABC12345"
-			};
+            PersonAddRequest? person2 = _fixture.Build<PersonAddRequest>()
+                .With(temp => temp.Email, "someone2@example.com")
+                .With(temp => temp.TIN, "ABC12345")
+                .Create();
 
 
             //act
@@ -205,31 +194,15 @@ namespace CrudTests
         public async Task GetFilteredPersons_WithSearchByAndSearchString()
         {
             //arrange
-            PersonAddRequest? person1 = new PersonAddRequest
-            {
-                PersonName = "Yahia Zakaria",
-                Email = "a@a.com",
-                Address = "Australia melbourne",
-                CountryId = Guid.NewGuid()
-,
-                DateOfBirth = DateTime.Parse("1991/01/10"),
-                Gender = GenderOptions.Male,
-                ReceiveNewsLetters = true,
-				TIN = "ABC12345"
-			};
+            PersonAddRequest? person1 = _fixture.Build<PersonAddRequest>()
+               .With(temp => temp.Email, "someone1@example.com")
+               .With(temp => temp.TIN, "ABC12345")
+               .Create();
 
-            PersonAddRequest? person2 = new PersonAddRequest
-            {
-                PersonName = "Ahmed Ali",
-                Email = "a@a.com",
-                Address = "Australia melbourne",
-                CountryId = Guid.NewGuid()
-,
-                DateOfBirth = DateTime.Parse("1993/01/10"),
-                Gender = GenderOptions.Male,
-                ReceiveNewsLetters = true,
-				TIN = "ABC12345"
-			};
+            PersonAddRequest? person2 = _fixture.Build<PersonAddRequest>()
+                .With(temp => temp.Email, "someone2@example.com")
+                .With(temp => temp.TIN, "ABC12345")
+                .Create();
 
             //act
             var person1Response = await _personService.Add(person1);
@@ -254,31 +227,15 @@ namespace CrudTests
         [Fact]
         public async Task GetSortedPerson_SortByPersonNameDescending()
         {
-            PersonAddRequest? person1 = new PersonAddRequest
-            {
-                PersonName = "Yahia Zakaria",
-                Email = "a@a.com",
-                Address = "Australia melbourne",
-                CountryId = Guid.NewGuid()
-,
-                DateOfBirth = DateTime.Parse("1991/01/10"),
-                Gender = GenderOptions.Male,
-                ReceiveNewsLetters = true,
-				TIN = "ABC12345"
-			};
+            PersonAddRequest? person1 = _fixture.Build<PersonAddRequest>()
+          .With(temp => temp.Email, "someone1@example.com")
+          .With(temp => temp.TIN, "ABC12345")
+          .Create();
 
-            PersonAddRequest? person2 = new PersonAddRequest
-            {
-                PersonName = "Ahmed Ali",
-                Email = "a@a.com",
-                Address = "Australia melbourne",
-                CountryId = Guid.NewGuid()
-,
-                DateOfBirth = DateTime.Parse("1993/01/10"),
-                Gender = GenderOptions.Male,
-                ReceiveNewsLetters = true,
-				TIN = "ABC12345"
-			};
+            PersonAddRequest? person2 = _fixture.Build<PersonAddRequest>()
+                .With(temp => temp.Email, "someone2@example.com")
+                .With(temp => temp.TIN, "ABC12345")
+                .Create();
 
             //act
             var person1Response = await _personService.Add(person1);
@@ -317,30 +274,15 @@ namespace CrudTests
         public async Task Update_PersonUpdateRequestWithFullDetails()
         {
             //arrange
-            PersonAddRequest? personToAdd = new PersonAddRequest
-            {
-                PersonName = "Yahia Zakaria",
-                Email = "a@a.com",
-                Address = "Australia melbourne",
-                CountryId = Guid.NewGuid(),
-                DateOfBirth = DateTime.Parse("1991/01/10"),
-                Gender = GenderOptions.Male,
-                ReceiveNewsLetters = true,
-				TIN = "ABC12345"
-			};
+            PersonAddRequest? personToAdd = _fixture.Build<PersonAddRequest>()
+                .With(temp => temp.Email, "someone1@example.com")
+                .With(temp => temp.TIN, "ABC12345")
+                .Create();
 
-            PersonUpdateRequest? personToUpdate = new PersonUpdateRequest
-            {
-				PersonName = "Ali Ali",
-				Email = "a@a.com",
-				Address = "Australia melbourne",
-				CountryId = Guid.NewGuid(),
-				DateOfBirth = DateTime.Parse("1994/01/10"),
-				Gender = GenderOptions.Male,
-				ReceiveNewsLetters = true,
-				TIN = "ABC12345"
-
-			};
+            PersonUpdateRequest? personToUpdate = _fixture.Build<PersonUpdateRequest>()
+                .With(temp => temp.Email, "someone2@example.com")
+                .With(temp => temp.TIN, "ABC12345")
+                .Create();
 
             //act
             var person_from_add = await _personService.Add(personToAdd);
@@ -361,7 +303,7 @@ namespace CrudTests
 
             //act   
             var isDeleted = await _personService.Delete(personId);
-            
+
             //assert
             Assert.False(isDeleted);
         }
@@ -369,18 +311,10 @@ namespace CrudTests
         [Fact]
         public async Task Delete_ValidPersonId()
         {
-            PersonAddRequest? person = new PersonAddRequest
-            {
-                PersonName = "Yahia Zakaria",
-                Email = "a@a.com",
-                Address = "Australia melbourne",
-                CountryId = Guid.NewGuid()
-,
-                DateOfBirth = DateTime.Parse("1991/01/10"),
-                Gender = GenderOptions.Male,
-                ReceiveNewsLetters = true,
-				TIN = "ABC12345"
-			};
+            PersonAddRequest? person = _fixture.Build<PersonAddRequest>()
+                .With(temp => temp.Email, "someone1@example.com")
+                .With(temp => temp.TIN, "ABC12345")
+                .Create();
 
             //act   
             var personResponse = await _personService.Add(person);

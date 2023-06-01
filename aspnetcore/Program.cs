@@ -14,7 +14,7 @@ builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 builder.Services.AddScoped<ICountryService, CountryService>();
 builder.Services.AddScoped<IPersonService, PersonService>();
 //DbContext
-builder.Services.AddDbContext<PersonsDbContext>(opt =>
+builder.Services.AddDbContext<ApplicationDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"));
 });
