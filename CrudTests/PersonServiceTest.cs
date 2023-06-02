@@ -8,6 +8,7 @@ using Services.Mapping;
 using Microsoft.EntityFrameworkCore;
 using EntityFrameworkCoreMock;
 using AutoFixture;
+using FluentAssertions;
 
 namespace CrudTests
 {
@@ -48,11 +49,13 @@ namespace CrudTests
             PersonAddRequest? person = null;
 
             //assert
-            await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            Func<Task> action = async () =>
             {
                 //act
                 var personResponse = await _personService.Add(person);
-            });
+            };
+
+            await action.Should().ThrowAsync<ArgumentNullException>();
 
         }
 
@@ -61,14 +64,16 @@ namespace CrudTests
         public async Task Add_NullPersonName()
         {
             //arrange
-            PersonAddRequest? person = _fixture.Build<PersonAddRequest>().With(temp=>temp.PersonName, null as string).Create();
+            PersonAddRequest? person = _fixture.Build<PersonAddRequest>().With(temp => temp.PersonName, null as string).Create();
 
             //assert
-            await Assert.ThrowsAsync<ArgumentException>(async () =>
+            Func<Task> action = async () =>
             {
                 //act
                 var personResponse = await _personService.Add(person);
-            });
+            };
+
+            await action.Should().ThrowAsync<ArgumentException>();
 
         }
 
@@ -87,8 +92,8 @@ namespace CrudTests
             var persons = await _personService.GetAll();
 
             //assert
-            Assert.True(personResponse.Id != Guid.Empty);
-            Assert.Contains(personResponse, persons);
+            personResponse.Id.Should().NotBe(Guid.Empty);
+            persons.Should().Contain(personResponse);
 
         }
         #endregion
@@ -145,7 +150,7 @@ namespace CrudTests
 
 
             //assert
-            Assert.Empty(persons);
+            persons.Should().BeEmpty();
         }
 
         [Fact]
@@ -169,8 +174,8 @@ namespace CrudTests
             var allPersons = await _personService.GetAll();
 
             //assert 
-            Assert.Contains(person1ResponseFromAdd, allPersons);
-            Assert.Contains(person2ResponseFromAdd, allPersons);
+            allPersons.Should().Contain(person1ResponseFromAdd);
+            allPersons.Should().Contain(person2ResponseFromAdd);
         }
         #endregion
 
@@ -186,7 +191,7 @@ namespace CrudTests
             var filteredPersons = await _personService.GetFilteredPerson(searchBy, searchString);
 
             //assert
-            Assert.Empty(filteredPersons);
+            filteredPersons.Should().BeEmpty();
 
         }
 
@@ -210,15 +215,11 @@ namespace CrudTests
             List<PersonResponse> personResponsesFromAdd = new List<PersonResponse>();
             personResponsesFromAdd.Add(person1Response);
             personResponsesFromAdd.Add(person2Response);
-            var filteredPersons = await _personService.GetFilteredPerson(nameof(Person.PersonName), "ya");
-            var allPersons = await _personService.GetAll();
+            var filteredPersons = await _personService.GetFilteredPerson(nameof(Person.PersonName), "per");
 
-            foreach (var item in allPersons)
-            {
-                var person = item.PersonName.Contains("ya", StringComparison.OrdinalIgnoreCase);
-                //assert 
-                Assert.Contains(item, allPersons);
-            }
+            //assert
+            filteredPersons.Should().OnlyContain(temp => temp.PersonName.Contains("per", StringComparison.OrdinalIgnoreCase));
+
         }
 
         #endregion
@@ -245,14 +246,9 @@ namespace CrudTests
             personResponsesFromAdd.Add(person2Response);
 
             var sortedPersonsFromAdd = _personService.GetSortedPersons(personResponsesFromAdd, nameof(PersonResponse.PersonName), SortOptions.DESCENDING);
-            var sortedPersonsFromGetAll = _personService.GetSortedPersons(
-                await _personService.GetAll(), nameof(PersonResponse.PersonName), SortOptions.DESCENDING);
 
-            for (int i = 0; i < sortedPersonsFromGetAll.Count; i++)
-            {
-                //assert
-                Assert.True(sortedPersonsFromAdd[i].Id == sortedPersonsFromGetAll[i].Id);
-            }
+            //assert
+            sortedPersonsFromAdd.Should().BeInDescendingOrder(prop => prop.PersonName);
         }
         #endregion
 
@@ -260,14 +256,16 @@ namespace CrudTests
         [Fact]
         public async Task Update_NullPersonUpdateRequest()
         {
-            PersonUpdateRequest personUpdateRequest = null;
+            PersonUpdateRequest? personUpdateRequest = null;
 
-            //assert
-            await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            //act
+            Func<Task> action = async () =>
             {
-                //act
                 await _personService.Update(personUpdateRequest);
-            });
+            };
+
+            //assert 
+            await action.Should().ThrowAsync<ArgumentNullException>();    
         }
 
         [Fact]
@@ -291,7 +289,7 @@ namespace CrudTests
             var person_from_getById = await _personService.GetById(person_after_update.Id);
 
             //assert
-            Assert.Equal(person_from_getById, person_after_update);
+            person_after_update.Should().BeEquivalentTo(person_from_getById);
         }
         #endregion
 
@@ -305,7 +303,7 @@ namespace CrudTests
             var isDeleted = await _personService.Delete(personId);
 
             //assert
-            Assert.False(isDeleted);
+            isDeleted.Should().BeFalse();
         }
 
         [Fact]
@@ -321,8 +319,8 @@ namespace CrudTests
             var isDeleted = await _personService.Delete(personResponse.Id);
 
             //assert
-            Assert.True(isDeleted);
-            Assert.DoesNotContain(personResponse, await _personService.GetAll());
+            isDeleted.Should().BeTrue();
+            (await _personService.GetAll()).Should().NotContain(personResponse);
         }
         #endregion
     }
