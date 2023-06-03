@@ -6,24 +6,25 @@ using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 using ServiceContracts;
 using ServiceContracts.DTO;
-using System.Diagnostics.Metrics;
+using ServiceContracts.Repository;
 
 namespace Services
 {
     public class CountryService : ICountryService
     {
         private readonly IMapper _mapper;
-		private readonly ApplicationDbContext _db;
+		private readonly IUnitOfWork _unitOfWork;
 
-		public CountryService(ApplicationDbContext db, IMapper mapper)
+		public CountryService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _mapper = mapper;
-            _db = db;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<CountryResponse> Add(CountryAddRequest countryAddRequest)
         {
-            if(countryAddRequest == null)
+            var countriesRepository = _unitOfWork.GetRepository<Country>();
+            if (countryAddRequest == null)
             {
                 throw new ArgumentNullException(nameof(countryAddRequest));
             }
@@ -31,34 +32,38 @@ namespace Services
             {
                 throw new ArgumentException(nameof(countryAddRequest.CountryName));
             }
-            if(await _db.Countries.AnyAsync(cntry=>cntry.CountryName == countryAddRequest.CountryName))
+            if(await countriesRepository.AnyAsync(cntry=>cntry.CountryName == countryAddRequest.CountryName))
             {
                 throw new ArgumentException("Duplicate country name");
             }
             var country = _mapper.Map<Country>(countryAddRequest);
             country.Id = Guid.NewGuid();
 
-             _db.Countries.Add(country);
-			await _db.SaveChangesAsync();
+            country = countriesRepository.Add(country);
+			await _unitOfWork.SaveChangesAsync();
 
 			return _mapper.Map<CountryResponse>(country);
         }
 
-        public async Task<IEnumerable<CountryResponse>> GetAll()
+        public async Task<List<CountryResponse>> GetAll()
         {
-            var CountriesResponse = await _db.Countries.ProjectTo<CountryResponse>(_mapper.ConfigurationProvider).ToListAsync();
+            var countriesRepository = _unitOfWork.GetRepository<Country>();
+            var CountriesResponse = await countriesRepository.GetAllAsync().ProjectTo<CountryResponse>
+                (_mapper.ConfigurationProvider).ToListAsync();
 
 			return CountriesResponse;
         }
 
         public async Task<CountryResponse?> GetById(Guid id)
         {
-            return _mapper.Map<CountryResponse>(await _db.Countries.FindAsync(id));
+            var countriesRepository = _unitOfWork.GetRepository<Country>();
+            return _mapper.Map<CountryResponse>(await countriesRepository.GetByIdAsync(id));
         }
 
 		public async Task<int> UploadCountriesFromExcelFile(IFormFile formFile)
 		{
-			MemoryStream memoryStream = new MemoryStream();
+            var countriesRepository = _unitOfWork.GetRepository<Country>();
+            MemoryStream memoryStream = new MemoryStream();
 			await formFile.CopyToAsync(memoryStream);
 			int countriesInserted = 0;
 
@@ -76,11 +81,11 @@ namespace Services
 					{
 						string? countryName = cellValue;
 
-						if (_db.Countries.Where(temp => temp.CountryName == countryName).Count() == 0)
+						if (!await countriesRepository.AnyAsync(temp => temp.CountryName == countryName))
 						{
 							Country country = new Country() { CountryName = countryName };
-							_db.Countries.Add(country);
-							await _db.SaveChangesAsync();
+							countriesRepository.Add(country);
+							await _unitOfWork.SaveChangesAsync();
 
 							countriesInserted++;
 						}

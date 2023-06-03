@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using EntityFrameworkCoreMock;
 using AutoFixture;
 using FluentAssertions;
+using ServiceContracts.Repository;
+using Infrastructure;
 
 namespace CrudTests
 {
@@ -16,6 +18,7 @@ namespace CrudTests
     {
         private readonly IPersonService _personService;
         private readonly Fixture _fixture;
+        private readonly IUnitOfWork _unitOfWork;
         private MapperConfiguration mapperConfiguration = new MapperConfiguration(cfg =>
         {
             cfg.AddProfile(new MappingProfile());
@@ -34,8 +37,9 @@ namespace CrudTests
             dbContextMock.CreateDbSetMock<Country>(entity => entity.Countries, countries);
             dbContextMock.CreateDbSetMock<Person>(entity => entity.Persons, persons);
 
-            CountryService countryService = new CountryService(dbContext, mapperConfiguration.CreateMapper());
-            _personService = new PersonService(dbContext, mapperConfiguration.CreateMapper(), countryService);
+            _unitOfWork = new UnitOfWork(dbContext);
+            CountryService countryService = new CountryService(_unitOfWork, mapperConfiguration.CreateMapper());
+            _personService = new PersonService(_unitOfWork, mapperConfiguration.CreateMapper(), countryService);
 
             _fixture = new Fixture();
         }

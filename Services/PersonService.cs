@@ -7,6 +7,7 @@ using OfficeOpenXml;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
+using ServiceContracts.Repository;
 using Services.Helpers;
 using System;
 using System.Collections.Generic;
@@ -21,24 +22,26 @@ namespace Services
 	public class PersonService : IPersonService
 	{
 		private readonly ICountryService _countryService;
-		private readonly ApplicationDbContext _db;
 		private readonly IMapper _mapper;
-		public PersonService(ApplicationDbContext db, IMapper mapper, ICountryService countryService)
+		private readonly IUnitOfWork _unitOfWork;
+        public PersonService(IUnitOfWork unitOfWork, IMapper mapper, ICountryService countryService)
 		{
-			_db = db;
+			_unitOfWork = unitOfWork;
 			_mapper = mapper;
 			_countryService = countryService;
 		}
 
 		public async Task<PersonResponse> Add(PersonAddRequest person)
 		{
-			if (person == null) throw new ArgumentNullException(nameof(person));
+			var personRepository = _unitOfWork.GetRepository<Person>();
+
+            if (person == null) throw new ArgumentNullException(nameof(person));
 			if (person.PersonName is null) throw new ArgumentException(nameof(person.PersonName));
 
 			var personToAdd = _mapper.Map<Person>(person);
 			personToAdd.Id = Guid.NewGuid();
-			_db.Persons.Add(personToAdd);
-			await _db.SaveChangesAsync();
+            personRepository.Add(personToAdd);
+			await _unitOfWork.SaveChangesAsync();
 
 			var personResponse = _mapper.Map<PersonResponse>(personToAdd);
 			return personResponse;
@@ -46,33 +49,36 @@ namespace Services
 
 		public async Task<bool> Delete(Guid id)
 		{
-			if (id == Guid.Empty)
+            var personRepository = _unitOfWork.GetRepository<Person>();
+            if (id == Guid.Empty)
 				return false;
 
-			var person = await _db.Persons.FindAsync(id);
+			var person = await personRepository.GetByIdAsync(id);
 
 			if (person is null)
 				return false;
 
-			_db.Persons.Remove(person);
-			await _db.SaveChangesAsync();
+			personRepository.Remove(person);
+			await _unitOfWork.SaveChangesAsync();
 
 			return true;
 		}
 
 		public async Task<List<PersonResponse>> GetAll()
 		{
-            var allPersons = await _db.Persons.Include(i=>i.Country).ProjectTo<PersonResponse>(_mapper.ConfigurationProvider).ToListAsync();
+            var personRepository = _unitOfWork.GetRepository<Person>();
+            var allPersons = await personRepository.GetAllAsync().Include(i=>i.Country).ProjectTo<PersonResponse>(_mapper.ConfigurationProvider).ToListAsync();
 			return allPersons;
 		}
 
 
 		public async Task<PersonResponse> GetById(Guid id)
 		{
-			if(id == Guid.Empty)
+            var personRepository = _unitOfWork.GetRepository<Person>();
+            if (id == Guid.Empty)
 				throw new ArgumentNullException("id");
 
-			var person = _mapper.Map<PersonResponse>(await _db.Persons.Include(i=>i.Country).FirstOrDefaultAsync(person=>person.Id==id));
+			var person = _mapper.Map<PersonResponse>(await personRepository.GetAllAsync().Include(i=>i.Country).FirstOrDefaultAsync(person=>person.Id==id));
 			return person;
 		}
 
@@ -206,17 +212,18 @@ namespace Services
 
 		public async Task<PersonResponse> Update(PersonUpdateRequest request)
 		{
-			if (request is null)
+            var personRepository = _unitOfWork.GetRepository<Person>();
+            if (request is null)
 				throw new ArgumentNullException();
 
-			var person = await _db.Persons.FindAsync(request.Id);
+			var person = await personRepository.GetByIdAsync(request.Id);
 			if (person == null)
 				throw new ArgumentException("The given ID doesn't exist");
 
 			ValidationHelper.Validate(request);
 
 			person = _mapper.Map(request, person);
-			await _db.SaveChangesAsync();
+			await _unitOfWork.SaveChangesAsync();
 
 			return _mapper.Map<PersonResponse>(person);
 
@@ -226,14 +233,15 @@ namespace Services
 
 		public async Task<MemoryStream> GetPersonsCSV()
 		{
-			MemoryStream memoryStream = new MemoryStream();
+            var personRepository = _unitOfWork.GetRepository<Person>();
+            MemoryStream memoryStream = new MemoryStream();
 			StreamWriter streamWriter = new StreamWriter(memoryStream);
 			CsvWriter csvWriter = new CsvWriter(streamWriter, CultureInfo.InvariantCulture, leaveOpen: true);
 
 			csvWriter.WriteHeader<PersonResponse>(); //PersonID,PersonName,...
 			csvWriter.NextRecord();
 
-			List<PersonResponse> persons = _db.Persons
+			List<PersonResponse> persons = personRepository.GetAllAsync()
 			  .Include("Country")
 			  .ProjectTo<PersonResponse>(_mapper.ConfigurationProvider).ToList();
 
@@ -246,7 +254,8 @@ namespace Services
 
 		public async Task<MemoryStream> GetPersonsExcel()
 		{
-			MemoryStream memoryStream = new MemoryStream();
+            var personRepository = _unitOfWork.GetRepository<Person>();
+            MemoryStream memoryStream = new MemoryStream();
 			using (ExcelPackage excelPackage = new ExcelPackage(memoryStream))
 			{
 				ExcelWorksheet workSheet = excelPackage.Workbook.Worksheets.Add("PersonsSheet");
@@ -268,7 +277,7 @@ namespace Services
 
 				int row = 2;
 
-				List<PersonResponse> persons = _db.Persons
+				List<PersonResponse> persons = personRepository.GetAllAsync()
 						  .Include("Country")
 						  .ProjectTo<PersonResponse>(_mapper.ConfigurationProvider).ToList();
 

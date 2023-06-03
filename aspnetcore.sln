@@ -9,11 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Entities", "Entities\Entiti
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceContracts", "ServiceContracts\ServiceContracts.csproj", "{E1CF4D90-67BB-472F-B7E3-524AB83CC7C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Services\Services.csproj", "{86415A2C-04AC-4115-AE0B-4D3619BC7BF5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services", "Services\Services.csproj", "{86415A2C-04AC-4115-AE0B-4D3619BC7BF5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{B045D9F1-320C-4F72-869C-9E5C823BDC32}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrudTests", "CrudTests\CrudTests.csproj", "{59F31CCE-7EF9-49A5-8184-EA46D24D1F66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CrudTests", "CrudTests\CrudTests.csproj", "{59F31CCE-7EF9-49A5-8184-EA46D24D1F66}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{3A9137AA-93A4-42F5-B3D8-CC6C3C3AB80F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,10 @@ Global
 		{59F31CCE-7EF9-49A5-8184-EA46D24D1F66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{59F31CCE-7EF9-49A5-8184-EA46D24D1F66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59F31CCE-7EF9-49A5-8184-EA46D24D1F66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A9137AA-93A4-42F5-B3D8-CC6C3C3AB80F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A9137AA-93A4-42F5-B3D8-CC6C3C3AB80F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A9137AA-93A4-42F5-B3D8-CC6C3C3AB80F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A9137AA-93A4-42F5-B3D8-CC6C3C3AB80F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

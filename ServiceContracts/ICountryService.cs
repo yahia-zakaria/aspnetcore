@@ -6,7 +6,7 @@ namespace ServiceContracts
     public interface ICountryService
     {
         Task<CountryResponse> Add(CountryAddRequest countryAddRequest);
-        Task<IEnumerable<CountryResponse>> GetAll();
+        Task<List<CountryResponse>> GetAll();
         Task<CountryResponse?> GetById(Guid id);
         Task<int> UploadCountriesFromExcelFile(IFormFile formFile);
 

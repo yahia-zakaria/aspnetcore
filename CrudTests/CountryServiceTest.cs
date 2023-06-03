@@ -2,9 +2,11 @@ using AutoMapper;
 using Entities;
 using EntityFrameworkCoreMock;
 using FluentAssertions;
+using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using ServiceContracts;
 using ServiceContracts.DTO;
+using ServiceContracts.Repository;
 using Services;
 using Services.Mapping;
 
@@ -13,6 +15,7 @@ namespace CrudTests
     public class CountryServiceTest
     {
         private readonly ICountryService _countryService;
+        private readonly IUnitOfWork _unitOfWork;
         private MapperConfiguration mapperConfiguration = new MapperConfiguration(cfg =>
         {
 			cfg.AddProfile(new MappingProfile());
@@ -30,7 +33,9 @@ namespace CrudTests
 
             dbContextMock.CreateDbSetMock<Country>(entity => entity.Countries, countries);
 
-            _countryService = new CountryService(dbContext, mapperConfiguration.CreateMapper());
+            _unitOfWork = new UnitOfWork(dbContext);
+
+            _countryService = new CountryService(_unitOfWork, mapperConfiguration.CreateMapper());
         }
 
         #region AddCountry
@@ -125,7 +130,7 @@ namespace CrudTests
             {
                 countryAddResponses.Add(await _countryService.Add(item));
             }
-            var countries = (await _countryService.GetAll()).ToList();
+            var countries = await _countryService.GetAll();
 
             //Assert 
             countryAddResponses.Should().BeEquivalentTo(countries);
