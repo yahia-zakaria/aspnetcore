@@ -61,7 +61,7 @@ namespace aspnetcore.Controllers
 			if (!ModelState.IsValid)
 			{
 				ViewBag.countries = new SelectList(await _countryService.GetAll(), "Id", "CountryName");
-				return View();
+				return View("Create", personAddRequest);
 			}
 			var response = await _personservice.Add(personAddRequest);
 			return RedirectToAction("Index", "Persons");
