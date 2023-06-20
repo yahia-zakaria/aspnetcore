@@ -1,5 +1,6 @@
 ﻿using Entities;
 using Infrastructure;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
 using Rotativa.AspNetCore;
 using ServiceContracts;
@@ -17,13 +18,15 @@ builder.Services.AddTransient(typeof(IAsyncRepository<>), typeof(RepositoryBase<
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICountryService, CountryService>();
 builder.Services.AddScoped<IPersonService, PersonService>();
+builder.Services.AddHttpLogging(opt => { opt.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders | HttpLoggingFields.ResponsePropertiesAndHeaders; });
 //DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"));
 });
 //Rotativa
-RotativaConfiguration.Setup("wwwroot", wkhtmltopdfRelativePath: "Rotativa");
+if (builder.Environment.IsEnvironment("Test") == false)
+    RotativaConfiguration.Setup("wwwroot", wkhtmltopdfRelativePath: "Rotativa");
 #endregion
 
 var app = builder.Build();
@@ -31,8 +34,9 @@ var app = builder.Build();
 #region Pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();    
+    app.UseDeveloperExceptionPage();
 }
+app.UseHttpLogging();
 app.UseStaticFiles();
 app.UseRouting();
 app.MapControllerRoute(
@@ -43,3 +47,5 @@ app.MapControllerRoute(
 app.Run();
 
 #endregion
+
+public partial class Program { }
