@@ -11,6 +11,8 @@ using AutoFixture;
 using FluentAssertions;
 using ServiceContracts.Repository;
 using Infrastructure;
+using Serilog;
+using Moq;
 
 namespace CrudTests
 {
@@ -32,6 +34,8 @@ namespace CrudTests
             var dbContextMock = new DbContextMock<ApplicationDbContext>(
                 new DbContextOptionsBuilder<ApplicationDbContext>().Options);
 
+            var DiagnosticContextMock = new Mock<IDiagnosticContext>();
+
             var dbContext = dbContextMock.Object;
 
             dbContextMock.CreateDbSetMock<Country>(entity => entity.Countries, countries);
@@ -39,7 +43,7 @@ namespace CrudTests
 
             _unitOfWork = new UnitOfWork(dbContext);
             CountryService countryService = new CountryService(_unitOfWork, mapperConfiguration.CreateMapper());
-            _personService = new PersonService(_unitOfWork, mapperConfiguration.CreateMapper(), countryService);
+            _personService = new PersonService(_unitOfWork, mapperConfiguration.CreateMapper(), countryService, DiagnosticContextMock.Object);
 
             _fixture = new Fixture();
         }

@@ -8,6 +8,7 @@ using ServiceContracts.Repository;
 using Services;
 using Services.Mapping;
 using System.Reflection;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,14 @@ builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICountryService, CountryService>();
 builder.Services.AddScoped<IPersonService, PersonService>();
 builder.Services.AddHttpLogging(opt => { opt.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders | HttpLoggingFields.ResponsePropertiesAndHeaders; });
+
+builder.Host.UseSerilog((context, services, loggerConfiguration) =>
+{
+    loggerConfiguration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services);
+});
+
 //DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(opt =>
 {
@@ -30,6 +39,7 @@ if (builder.Environment.IsEnvironment("Test") == false)
 #endregion
 
 var app = builder.Build();
+app.UseSerilogRequestLogging();
 
 #region Pipeline
 if (app.Environment.IsDevelopment())

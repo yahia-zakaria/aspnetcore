@@ -7,6 +7,8 @@ using ServiceContracts.DTO;
 using ServiceContracts.Enums;
 using Services;
 using Rotativa.AspNetCore.Options;
+using SerilogTimings;
+using aspnetcore.Filters.ActionFilters;
 
 namespace aspnetcore.Controllers
 {
@@ -23,27 +25,20 @@ namespace aspnetcore.Controllers
 			_mapper = mapper;
 		}
 
+		[TypeFilter(typeof(PersonsListActionFilter))]
 		public async Task<IActionResult> Index(string searchBy, string searchString,
 			string sortBy = nameof(PersonResponse.PersonName), SortOptions sortDir = SortOptions.ASCENDING)
 		{
-			ViewBag.searchFields = new Dictionary<string, string>()
+			List<PersonResponse> persons = new List<PersonResponse>();
+			List<PersonResponse> sortedPersons = new List<PersonResponse>();
+
+			using (Operation.Time("Time taken for filtering and sorting persons"))
 			{
-				{nameof(PersonResponse.PersonName), "Person Name" },
-				{nameof(PersonResponse.Email), "Email" },
-				{nameof(PersonResponse.Age), "Age" },
-				{nameof(PersonResponse.DateOfBirth), "DateOfBirth" },
-				{nameof(PersonResponse.Gender), "Gender" },
-				{nameof(PersonResponse.Country), "Country" },
-				{nameof(PersonResponse.Address), "Address" }
-			};
-			var persons = await _personservice.GetFilteredPerson(searchBy, searchString);
+                 persons = await _personservice.GetFilteredPerson(searchBy, searchString);
 
-			var sortedPersons = _personservice.GetSortedPersons(persons, sortBy, sortDir);
+                 sortedPersons = _personservice.GetSortedPersons(persons, sortBy, sortDir);
+            }
 
-			ViewBag.currentSearchBy = searchBy;
-			ViewBag.currentSearchString = searchString;
-			ViewBag.currentSortBy = sortBy;
-			ViewBag.currentSortDir = sortDir;
 
 			return View(sortedPersons);
 		}

@@ -4,6 +4,7 @@ using CsvHelper;
 using Entities;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
+using Serilog;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
@@ -15,6 +16,7 @@ using System.Formats.Asn1;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Services
@@ -24,11 +26,14 @@ namespace Services
 		private readonly ICountryService _countryService;
 		private readonly IMapper _mapper;
 		private readonly IUnitOfWork _unitOfWork;
-        public PersonService(IUnitOfWork unitOfWork, IMapper mapper, ICountryService countryService)
+		private readonly IDiagnosticContext _diagnosticContext;
+        public PersonService(IUnitOfWork unitOfWork, IMapper mapper, ICountryService countryService,
+            IDiagnosticContext diagnosticContext)
 		{
 			_unitOfWork = unitOfWork;
 			_mapper = mapper;
 			_countryService = countryService;
+			_diagnosticContext = diagnosticContext;
 		}
 
 		public async Task<PersonResponse> Add(PersonAddRequest person)
@@ -145,7 +150,6 @@ namespace Services
 				default:
 					matchingPersons = allPersons; break;
 			}
-
 			return matchingPersons;
 		}
 
@@ -206,8 +210,8 @@ namespace Services
 				allPerson.OrderByDescending(person => person.TIN).ToList(),
 
 			};
-
-			return sortedPersons;
+            _diagnosticContext.Set("Persons", JsonSerializer.Serialize(sortedPersons));
+            return sortedPersons;
 		}
 
 		public async Task<PersonResponse> Update(PersonUpdateRequest request)
