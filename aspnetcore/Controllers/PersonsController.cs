@@ -12,7 +12,7 @@ using aspnetcore.Filters.ActionFilters;
 
 namespace aspnetcore.Controllers
 {
-    [TypeFilter(typeof(ReponseHeaderActionFilter), Arguments = new object[] { "X-Custom-Key-FromController", "Custom-Value-FromController" }, Order = 2)]
+    [TypeFilter(typeof(ReponseHeaderActionFilter), Arguments = new object[] { "X-Custom-Key-FromController", "Custom-Value-FromController", 2})]
     public class PersonsController : Controller
     {
         private readonly IPersonService _personservice;
@@ -27,7 +27,7 @@ namespace aspnetcore.Controllers
         }
 
         [TypeFilter(typeof(PersonsListActionFilter))]
-        [TypeFilter(typeof(ReponseHeaderActionFilter), Arguments = new object[] { "X-Custom-Key-FromAction", "Custom-Value-FromAction" }, Order = 1)]
+        [TypeFilter(typeof(ReponseHeaderActionFilter), Arguments = new object[] { "X-Custom-Key-FromAction", "Custom-Value-FromAction", 1})]
         public async Task<IActionResult> Index(string searchBy, string searchString,
             string sortBy = nameof(PersonResponse.PersonName), SortOptions sortDir = SortOptions.ASCENDING)
         {

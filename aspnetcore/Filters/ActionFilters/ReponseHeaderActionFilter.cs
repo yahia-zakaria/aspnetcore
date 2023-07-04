@@ -3,17 +3,21 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace aspnetcore.Filters.ActionFilters
 {
-    public class ReponseHeaderActionFilter : IActionFilter
+    public class ReponseHeaderActionFilter : IActionFilter, IOrderedFilter
     {
         private readonly ILogger<ReponseHeaderActionFilter> _logger;
         private readonly string _key;
         private readonly string _value;
 
-        public ReponseHeaderActionFilter(ILogger<ReponseHeaderActionFilter> logger, string key, string value)
+        public int Order { get; set; }
+
+        public ReponseHeaderActionFilter(ILogger<ReponseHeaderActionFilter> logger, string key, string value, int order)
         {
             _logger = logger;
             _key = key;
             _value = value;
+            Order = order;
+
         }
         public void OnActionExecuting(ActionExecutingContext context)
         {
