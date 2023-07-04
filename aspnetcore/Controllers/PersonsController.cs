@@ -12,135 +12,137 @@ using aspnetcore.Filters.ActionFilters;
 
 namespace aspnetcore.Controllers
 {
-	public class PersonsController : Controller
-	{
-		private readonly IPersonService _personservice;
-		private readonly ICountryService _countryService;
-		private readonly IMapper _mapper;
+    [TypeFilter(typeof(ReponseHeaderActionFilter), Arguments = new object[] { "X-Custom-Key-FromController", "Custom-Value-FromController" })]
+    public class PersonsController : Controller
+    {
+        private readonly IPersonService _personservice;
+        private readonly ICountryService _countryService;
+        private readonly IMapper _mapper;
 
-		public PersonsController(IPersonService personservice, ICountryService countryService, IMapper mapper)
-		{
-			_personservice = personservice;
-			_countryService = countryService;
-			_mapper = mapper;
-		}
+        public PersonsController(IPersonService personservice, ICountryService countryService, IMapper mapper)
+        {
+            _personservice = personservice;
+            _countryService = countryService;
+            _mapper = mapper;
+        }
 
-		[TypeFilter(typeof(PersonsListActionFilter))]
-		public async Task<IActionResult> Index(string searchBy, string searchString,
-			string sortBy = nameof(PersonResponse.PersonName), SortOptions sortDir = SortOptions.ASCENDING)
-		{
-			List<PersonResponse> persons = new List<PersonResponse>();
-			List<PersonResponse> sortedPersons = new List<PersonResponse>();
+        [TypeFilter(typeof(PersonsListActionFilter))]
+        [TypeFilter(typeof(ReponseHeaderActionFilter), Arguments = new object[] { "X-Custom-Key-FromAction", "Custom-Value-FromAction" })]
+        public async Task<IActionResult> Index(string searchBy, string searchString,
+            string sortBy = nameof(PersonResponse.PersonName), SortOptions sortDir = SortOptions.ASCENDING)
+        {
+            List<PersonResponse> persons = new List<PersonResponse>();
+            List<PersonResponse> sortedPersons = new List<PersonResponse>();
 
-			using (Operation.Time("Time taken for filtering and sorting persons"))
-			{
-                 persons = await _personservice.GetFilteredPerson(searchBy, searchString);
+            using (Operation.Time("Time taken for filtering and sorting persons"))
+            {
+                persons = await _personservice.GetFilteredPerson(searchBy, searchString);
 
-                 sortedPersons = _personservice.GetSortedPersons(persons, sortBy, sortDir);
+                sortedPersons = _personservice.GetSortedPersons(persons, sortBy, sortDir);
             }
 
 
-			return View(sortedPersons);
-		}
+            return View(sortedPersons);
+        }
 
-		[HttpGet]
-		public async Task<IActionResult> Create()
-		{
-			ViewBag.countries = new SelectList(await _countryService.GetAll(), "Id", "CountryName");
-			return View();
-		}
+        [HttpGet]
+        public async Task<IActionResult> Create()
+        {
+            ViewBag.countries = new SelectList(await _countryService.GetAll(), "Id", "CountryName");
+            return View();
+        }
 
-		[HttpPost]
-		public async Task<IActionResult> Create(PersonAddRequest personAddRequest)
-		{
-			if (!ModelState.IsValid)
-			{
-				ViewBag.countries = new SelectList(await _countryService.GetAll(), "Id", "CountryName");
-				return View("Create", personAddRequest);
-			}
-			var response = await _personservice.Add(personAddRequest);
-			return RedirectToAction("Index", "Persons");
-		}
+        [HttpPost]
+        public async Task<IActionResult> Create(PersonAddRequest personAddRequest)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.countries = new SelectList(await _countryService.GetAll(), "Id", "CountryName");
+                return View("Create", personAddRequest);
+            }
+            var response = await _personservice.Add(personAddRequest);
+            return RedirectToAction("Index", "Persons");
+        }
 
-		[HttpGet]
-		public async Task<IActionResult> Edit(Guid id)
-		{
-			if (id == Guid.Empty)
-			{
-				return BadRequest();
-			}
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                return BadRequest();
+            }
 
-			var person = await _personservice.GetById(id);
-			if (person == null)
-			{
-				return NotFound();
-			}
+            var person = await _personservice.GetById(id);
+            if (person == null)
+            {
+                return NotFound();
+            }
 
-			ViewBag.countries = new SelectList(await _countryService.GetAll(), "Id", "CountryName");
-			return View(_mapper.Map<PersonUpdateRequest>(person));
-		}
+            ViewBag.countries = new SelectList(await _countryService.GetAll(), "Id", "CountryName");
+            return View(_mapper.Map<PersonUpdateRequest>(person));
+        }
 
-		[HttpPost]
-		public async Task<IActionResult> Edit(PersonUpdateRequest personUpdateRequest)
-		{
-			if (!ModelState.IsValid)
-			{
-				ViewBag.countries = new SelectList(await _countryService.GetAll(), "Id", "CountryName");
-				return View(personUpdateRequest);
-			}
-			await _personservice.Update(personUpdateRequest);
-			return RedirectToAction("Index");
-		}
-		[HttpGet]
-		public async Task<IActionResult> Delete(Guid id)
-		{
-			if (id == Guid.Empty)
-			{
-				return BadRequest();
-			}
+        [HttpPost]
+        public async Task<IActionResult> Edit(PersonUpdateRequest personUpdateRequest)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.countries = new SelectList(await _countryService.GetAll(), "Id", "CountryName");
+                return View(personUpdateRequest);
+            }
+            await _personservice.Update(personUpdateRequest);
+            return RedirectToAction("Index");
+        }
+        [HttpGet]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                return BadRequest();
+            }
 
-			var person = await _personservice.GetById(id);
-			if (person == null)
-			{
-				return NotFound();
-			}
+            var person = await _personservice.GetById(id);
+            if (person == null)
+            {
+                return NotFound();
+            }
 
-			ViewBag.countries = new SelectList(await _countryService.GetAll(), "Id", "CountryName");
-			return View(person);
-		}
+            ViewBag.countries = new SelectList(await _countryService.GetAll(), "Id", "CountryName");
+            return View(person);
+        }
 
-		[HttpPost]
-		[ActionName("Delete")]
-		public async Task<IActionResult> ConfirmDelete(Guid id)
-		{
-			if (id == Guid.Empty)
-			{
-				return BadRequest();
-			}
-			await _personservice.Delete(id);
-			return RedirectToAction("Index");
-		}
-		public async Task<IActionResult> PersonsPDF()
-		{
-			//Get list of persons
-			List<PersonResponse> persons = await _personservice.GetAll();
+        [HttpPost]
+        [ActionName("Delete")]
+        public async Task<IActionResult> ConfirmDelete(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                return BadRequest();
+            }
+            await _personservice.Delete(id);
+            return RedirectToAction("Index");
+        }
+        public async Task<IActionResult> PersonsPDF()
+        {
+            //Get list of persons
+            List<PersonResponse> persons = await _personservice.GetAll();
 
-			//Return view as pdf
-			return new ViewAsPdf("PersonsPDF", persons, ViewData)
-			{
-				PageMargins = new Margins() { Top = 20, Right = 20, Bottom = 20, Left = 20 },
-				PageOrientation = Orientation.Landscape
-			};
-		}
-		public async Task<IActionResult> PersonsCSV()
-		{
-			MemoryStream memoryStream = await _personservice.GetPersonsCSV();
-			return File(memoryStream, "application/octet-stream", "persons.csv");
-		}
-		public async Task<IActionResult> PersonsExcel()
-		{
-			MemoryStream memoryStream = await _personservice.GetPersonsExcel();
-			return File(memoryStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "persons.xlsx");
-		}
-	}
+            //Return view as pdf
+            return new ViewAsPdf("PersonsPDF", persons, ViewData)
+            {
+                PageMargins = new Margins() { Top = 20, Right = 20, Bottom = 20, Left = 20 },
+                PageOrientation = Orientation.Landscape
+            };
+        }
+        public async Task<IActionResult> PersonsCSV()
+        {
+            MemoryStream memoryStream = await _personservice.GetPersonsCSV();
+            return File(memoryStream, "application/octet-stream", "persons.csv");
+        }
+        public async Task<IActionResult> PersonsExcel()
+        {
+            MemoryStream memoryStream = await _personservice.GetPersonsExcel();
+            return File(memoryStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "persons.xlsx");
+        }
+    }
 }

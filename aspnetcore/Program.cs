@@ -9,11 +9,16 @@ using Services;
 using Services.Mapping;
 using System.Reflection;
 using Serilog;
+using aspnetcore.Filters.ActionFilters;
 
 var builder = WebApplication.CreateBuilder(args);
 
 #region ConfigureService
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<ReponseHeaderActionFilter>>();
+    options.Filters.Add(new ReponseHeaderActionFilter(logger, "X-Custom-Key-FromGlobal", "Custom-Value-FromGlobal"));
+});
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 builder.Services.AddTransient(typeof(IAsyncRepository<>), typeof(RepositoryBase<>));
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
