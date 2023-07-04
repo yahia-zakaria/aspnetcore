@@ -53,14 +53,10 @@ namespace aspnetcore.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(PersonAddRequest personAddRequest)
+        [TypeFilter(typeof(PersonCreateEditPostActionFilter))]
+        public async Task<IActionResult> Create(PersonAddRequest model)
         {
-            if (!ModelState.IsValid)
-            {
-                ViewBag.countries = new SelectList(await _countryService.GetAll(), "Id", "CountryName");
-                return View("Create", personAddRequest);
-            }
-            var response = await _personservice.Add(personAddRequest);
+            var response = await _personservice.Add(model);
             return RedirectToAction("Index", "Persons");
         }
 
@@ -83,14 +79,10 @@ namespace aspnetcore.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(PersonUpdateRequest personUpdateRequest)
+        [TypeFilter(typeof(PersonCreateEditPostActionFilter))]
+        public async Task<IActionResult> Edit(PersonUpdateRequest model)
         {
-            if (!ModelState.IsValid)
-            {
-                ViewBag.countries = new SelectList(await _countryService.GetAll(), "Id", "CountryName");
-                return View(personUpdateRequest);
-            }
-            await _personservice.Update(personUpdateRequest);
+            await _personservice.Update(model);
             return RedirectToAction("Index");
         }
         [HttpGet]

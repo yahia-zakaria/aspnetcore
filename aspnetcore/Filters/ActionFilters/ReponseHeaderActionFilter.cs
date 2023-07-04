@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace aspnetcore.Filters.ActionFilters
 {
-    public class ReponseHeaderActionFilter : IActionFilter, IOrderedFilter
+    public class ReponseHeaderActionFilter : IAsyncActionFilter, IOrderedFilter
     {
         private readonly ILogger<ReponseHeaderActionFilter> _logger;
         private readonly string _key;
@@ -19,18 +19,16 @@ namespace aspnetcore.Filters.ActionFilters
             Order = order;
 
         }
-        public void OnActionExecuting(ActionExecutingContext context)
+
+        public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
+            _logger.LogInformation("{ActionFilterName}-{MethodName} method - befor", nameof(ReponseHeaderActionFilter), nameof(OnActionExecutionAsync));
 
-        }
+            await next();
 
-
-        public void OnActionExecuted(ActionExecutedContext context)
-        {
-            _logger.LogInformation("{ActionFilterName}-{MethodName} method", nameof(ReponseHeaderActionFilter), nameof(OnActionExecuted));
+            _logger.LogInformation("{ActionFilterName}-{MethodName} method - after", nameof(ReponseHeaderActionFilter), nameof(OnActionExecutionAsync));
             context.HttpContext.Response.Headers[_key] = _value;
             _logger.LogInformation("header: {key} with value: {value} has been set", _key, _value);
         }
-
     }
 }
