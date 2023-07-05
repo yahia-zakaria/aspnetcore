@@ -22,11 +22,11 @@ namespace aspnetcore.Filters.ActionFilters
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            _logger.LogInformation("{ActionFilterName}-{MethodName} method - befor", nameof(ReponseHeaderActionFilter), nameof(OnActionExecutionAsync));
+            _logger.LogInformation("{FilterName}-{MethodName} method - befor", nameof(ReponseHeaderActionFilter), nameof(OnActionExecutionAsync));
 
             await next();
 
-            _logger.LogInformation("{ActionFilterName}-{MethodName} method - after", nameof(ReponseHeaderActionFilter), nameof(OnActionExecutionAsync));
+            _logger.LogInformation("{FilterName}-{MethodName} method - after", nameof(ReponseHeaderActionFilter), nameof(OnActionExecutionAsync));
             context.HttpContext.Response.Headers[_key] = _value;
             _logger.LogInformation("header: {key} with value: {value} has been set", _key, _value);
         }

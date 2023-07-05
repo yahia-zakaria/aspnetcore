@@ -9,10 +9,12 @@ using Services;
 using Rotativa.AspNetCore.Options;
 using SerilogTimings;
 using aspnetcore.Filters.ActionFilters;
+using aspnetcore.Filters.ResultFilters;
+using aspnetcore.Filters.ResourceFilters;
 
 namespace aspnetcore.Controllers
 {
-    [TypeFilter(typeof(ReponseHeaderActionFilter), Arguments = new object[] { "X-Custom-Key-FromController", "Custom-Value-FromController", 2})]
+    [TypeFilter(typeof(ReponseHeaderActionFilter), Arguments = new object[] { "X-Custom-Key-FromController", "Custom-Value-FromController", 2 })]
     public class PersonsController : Controller
     {
         private readonly IPersonService _personservice;
@@ -27,7 +29,8 @@ namespace aspnetcore.Controllers
         }
 
         [TypeFilter(typeof(PersonsListActionFilter))]
-        [TypeFilter(typeof(ReponseHeaderActionFilter), Arguments = new object[] { "X-Custom-Key-FromAction", "Custom-Value-FromAction", 1})]
+        [TypeFilter(typeof(ReponseHeaderActionFilter), Arguments = new object[] { "X-Custom-Key-FromAction", "Custom-Value-FromAction", 1 })]
+        [TypeFilter(typeof(PersonsListResultFilter))]
         public async Task<IActionResult> Index(string searchBy, string searchString,
             string sortBy = nameof(PersonResponse.PersonName), SortOptions sortDir = SortOptions.ASCENDING)
         {
@@ -46,6 +49,7 @@ namespace aspnetcore.Controllers
         }
 
         [HttpGet]
+        [TypeFilter(typeof(DisableFeatureResourceFilter), Arguments = new object[] { false })]
         public async Task<IActionResult> Create()
         {
             ViewBag.countries = new SelectList(await _countryService.GetAll(), "Id", "CountryName");
