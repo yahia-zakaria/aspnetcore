@@ -11,6 +11,7 @@ using SerilogTimings;
 using aspnetcore.Filters.ActionFilters;
 using aspnetcore.Filters.ResultFilters;
 using aspnetcore.Filters.ResourceFilters;
+using aspnetcore.Filters.AuthorizationFilters;
 
 namespace aspnetcore.Controllers
 {
@@ -31,6 +32,7 @@ namespace aspnetcore.Controllers
         [TypeFilter(typeof(PersonsListActionFilter))]
         [TypeFilter(typeof(ReponseHeaderActionFilter), Arguments = new object[] { "X-Custom-Key-FromAction", "Custom-Value-FromAction", 1 })]
         [TypeFilter(typeof(PersonsListResultFilter))]
+        [TypeFilter(typeof(TokenResultFilter))]
         public async Task<IActionResult> Index(string searchBy, string searchString,
             string sortBy = nameof(PersonResponse.PersonName), SortOptions sortDir = SortOptions.ASCENDING)
         {
@@ -84,6 +86,7 @@ namespace aspnetcore.Controllers
 
         [HttpPost]
         [TypeFilter(typeof(PersonCreateEditPostActionFilter))]
+        [TypeFilter(typeof(TokenAuthorizationFilter))]
         public async Task<IActionResult> Edit(PersonUpdateRequest model)
         {
             await _personservice.Update(model);
