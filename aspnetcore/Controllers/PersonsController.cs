@@ -17,7 +17,7 @@ using aspnetcore.Filters.SkipFilters;
 
 namespace aspnetcore.Controllers
 {
-    [TypeFilter(typeof(ReponseHeaderActionFilter), Arguments = new object[] { "X-Custom-Key-FromController", "Custom-Value-FromController", 2 })]
+    [ReponseHeaderActionFilter("X-Custom-Key-FromController", "Custom-Value-FromController", 2)]
     [TypeFilter(typeof(HandleExceptionFilter))]
     public class PersonsController : Controller
     {
@@ -33,7 +33,7 @@ namespace aspnetcore.Controllers
         }
 
         [TypeFilter(typeof(PersonsListActionFilter))]
-        [TypeFilter(typeof(ReponseHeaderActionFilter), Arguments = new object[] { "X-Custom-Key-FromAction", "Custom-Value-FromAction", 1 })]
+        [ReponseHeaderActionFilter("X-Custom-Key-FromAction", "Custom-Value-FromAction", 1)]
         [TypeFilter(typeof(PersonsListResultFilter))]
         [TypeFilter(typeof(TokenResultFilter))]
         public async Task<IActionResult> Index(string searchBy, string searchString,

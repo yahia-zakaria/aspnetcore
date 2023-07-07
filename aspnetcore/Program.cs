@@ -16,8 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 #region ConfigureService
 builder.Services.AddControllersWithViews(options =>
 {
-    var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<ReponseHeaderActionFilter>>();
-    options.Filters.Add(new ReponseHeaderActionFilter(logger, "X-Custom-Key-FromGlobal", "Custom-Value-FromGlobal", 3));
+    options.Filters.Add(new ReponseHeaderActionFilter("X-Custom-Key-FromGlobal", "Custom-Value-FromGlobal", 3));
 });
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 builder.Services.AddTransient(typeof(IAsyncRepository<>), typeof(RepositoryBase<>));
