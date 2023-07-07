@@ -13,6 +13,7 @@ using aspnetcore.Filters.ResultFilters;
 using aspnetcore.Filters.ResourceFilters;
 using aspnetcore.Filters.AuthorizationFilters;
 using aspnetcore.Filters.ExceptionFilters;
+using aspnetcore.Filters.SkipFilters;
 
 namespace aspnetcore.Controllers
 {
@@ -70,6 +71,7 @@ namespace aspnetcore.Controllers
 
         [HttpGet]
         [TypeFilter(typeof(PersonAlwaysRunResultFilter))]
+        [SkipAlwaysRunResultFilter]
         public async Task<IActionResult> Edit(Guid id)
         {
             if (id == Guid.Empty)

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
+﻿using aspnetcore.Filters.SkipFilters;
+using Microsoft.AspNetCore.Mvc.Filters;
+using System.Linq;
 
 namespace aspnetcore.Filters.ResultFilters
 {
@@ -6,12 +8,14 @@ namespace aspnetcore.Filters.ResultFilters
     {
         public void OnResultExecuted(ResultExecutedContext context)
         {
-            throw new NotImplementedException();
         }
 
         public void OnResultExecuting(ResultExecutingContext context)
         {
-            throw new NotImplementedException();
+            if (context.Filters.OfType<SkipAlwaysRunResultFilter>().Any())
+            {
+                return;
+            }
         }
     }
 }
