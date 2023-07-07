@@ -1,6 +1,8 @@
-﻿namespace aspnetcore.Filters.SkipFilters
+﻿using Microsoft.AspNetCore.Mvc.Filters;
+
+namespace aspnetcore.Filters.SkipFilters
 {
-    public class SkipAlwaysRunFilter
+    public class SkipAlwaysRunResultFilter : Attribute, IFilterMetadata
     {
     }
 }
