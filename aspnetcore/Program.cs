@@ -10,37 +10,15 @@ using Services.Mapping;
 using System.Reflection;
 using Serilog;
 using aspnetcore.Filters.ActionFilters;
+using aspnetcore.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-#region ConfigureService
-builder.Services.AddControllersWithViews(options =>
-{
-    options.Filters.Add(new ReponseHeaderActionFilter("X-Custom-Key-FromGlobal", "Custom-Value-FromGlobal", 3));
-});
-builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
-builder.Services.AddTransient(typeof(IAsyncRepository<>), typeof(RepositoryBase<>));
-builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<ICountryService, CountryService>();
-builder.Services.AddScoped<IPersonService, PersonService>();
-builder.Services.AddHttpLogging(opt => { opt.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders | HttpLoggingFields.ResponsePropertiesAndHeaders; });
+builder.Services.ConfigureServices(builder.Configuration, builder.Host);
 
-builder.Host.UseSerilog((context, services, loggerConfiguration) =>
-{
-    loggerConfiguration
-    .ReadFrom.Configuration(context.Configuration)
-    .ReadFrom.Services(services);
-});
-
-//DbContext
-builder.Services.AddDbContext<ApplicationDbContext>(opt =>
-{
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"));
-});
 //Rotativa
 if (builder.Environment.IsEnvironment("Test") == false)
-    RotativaConfiguration.Setup("wwwroot", wkhtmltopdfRelativePath: "Rotativa");
-#endregion
+	RotativaConfiguration.Setup("wwwroot", wkhtmltopdfRelativePath: "Rotativa");
 
 var app = builder.Build();
 app.UseSerilogRequestLogging();
