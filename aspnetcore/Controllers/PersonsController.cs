@@ -12,10 +12,12 @@ using aspnetcore.Filters.ActionFilters;
 using aspnetcore.Filters.ResultFilters;
 using aspnetcore.Filters.ResourceFilters;
 using aspnetcore.Filters.AuthorizationFilters;
+using aspnetcore.Filters.ExceptionFilters;
 
 namespace aspnetcore.Controllers
 {
     [TypeFilter(typeof(ReponseHeaderActionFilter), Arguments = new object[] { "X-Custom-Key-FromController", "Custom-Value-FromController", 2 })]
+    [TypeFilter(typeof(HandleExceptionFilter))]
     public class PersonsController : Controller
     {
         private readonly IPersonService _personservice;
@@ -67,6 +69,7 @@ namespace aspnetcore.Controllers
         }
 
         [HttpGet]
+        [TypeFilter(typeof(PersonAlwaysRunResultFilter))]
         public async Task<IActionResult> Edit(Guid id)
         {
             if (id == Guid.Empty)
