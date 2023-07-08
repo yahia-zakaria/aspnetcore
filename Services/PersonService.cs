@@ -9,6 +9,7 @@ using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
 using ServiceContracts.Repository;
+using Services.Exceptions;
 using Services.Helpers;
 using System;
 using System.Collections.Generic;
@@ -222,7 +223,7 @@ namespace Services
 
 			var person = await personRepository.GetByIdAsync(request.Id);
 			if (person == null)
-				throw new ArgumentException("The given ID doesn't exist");
+				throw new InvalidPersonIdException("The given ID doesn't exist");
 
 			ValidationHelper.Validate(request);
 

@@ -31,11 +31,11 @@ namespace aspnetcore.Middlewares
 			{
 				if (ex.InnerException is not null)
 				{
-					_logger.LogError("{ExceptionType}\n{ExceptionMessage}", ex.InnerException.GetType().ToString(), ex.InnerException.Message);
+					_logger.LogError("ExceptionType: {ExceptionType}, ExceptionMessage: {ExceptionMessage}", ex.InnerException.GetType().ToString(), ex.InnerException.Message);
 				}
 				else
 				{
-					_logger.LogError("{ExceptionType}\n{ExceptionMessage}", ex.GetType().ToString(), ex.Message);
+					_logger.LogError("ExceptionType: {ExceptionType}, ExceptionMessage: {ExceptionMessage}", ex.GetType().ToString(), ex.Message);
 				}
 				context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 				await context.Response.WriteAsync("Error has been occured");
