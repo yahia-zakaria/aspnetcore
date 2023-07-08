@@ -11,6 +11,7 @@ using System.Reflection;
 using Serilog;
 using aspnetcore.Filters.ActionFilters;
 using aspnetcore.Extensions;
+using aspnetcore.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,14 +27,18 @@ app.UseSerilogRequestLogging();
 #region Pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();
+	app.UseDeveloperExceptionPage();
+}
+else
+{
+	app.UseExceptionHandlingMiddleware();
 }
 app.UseHttpLogging();
 app.UseStaticFiles();
 app.UseRouting();
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Persons}/{action=Index}/{id?}");
+	name: "default",
+	pattern: "{controller=Persons}/{action=Index}/{id?}");
 
 
 app.Run();

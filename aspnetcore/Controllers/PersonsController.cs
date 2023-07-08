@@ -15,10 +15,12 @@ using aspnetcore.Filters.AuthorizationFilters;
 using aspnetcore.Filters.ExceptionFilters;
 using aspnetcore.Filters.SkipFilters;
 
+
+
 namespace aspnetcore.Controllers
 {
     [ReponseHeaderActionFilter("X-Custom-Key-FromController", "Custom-Value-FromController", 2)]
-    [TypeFilter(typeof(HandleExceptionFilter))]
+    //[TypeFilter(typeof(HandleExceptionFilter))]
     public class PersonsController : Controller
     {
         private readonly IPersonService _personservice;
@@ -148,5 +150,5 @@ namespace aspnetcore.Controllers
             MemoryStream memoryStream = await _personservice.GetPersonsExcel();
             return File(memoryStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "persons.xlsx");
         }
-    }
+	}
 }
