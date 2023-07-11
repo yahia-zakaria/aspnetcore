@@ -96,7 +96,7 @@ namespace aspnetcore.Controllers
         //[TypeFilter(typeof(TokenAuthorizationFilter))]
         public async Task<IActionResult> Edit(PersonUpdateRequest model)
         {
-            model.Id = Guid.NewGuid();
+            model.Id = Guid.NewGuid();  
             await _personservice.Update(model);
             return RedirectToAction("Index");
         }

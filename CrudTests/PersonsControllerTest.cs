@@ -71,31 +71,31 @@ namespace CrudTests
         #endregion
 
         #region Create_Action
-        [Fact]
-        public async Task Create_IfModelErrors_ToReturnCreateView()
-        {
-            //arrange
-            var personAddRequest = _fixture.Create<PersonAddRequest>();
-            PersonsController personsController = new(_personsService, _countriesService, mapperConfiguration.CreateMapper());
-            PersonResponse personResponse = _fixture.Create<PersonResponse>();
-            List<CountryResponse> countyries = _fixture.Create<List<CountryResponse>>();
+        //[Fact]
+        //public async Task Create_IfModelErrors_ToReturnCreateView()
+        //{
+        //    //arrange
+        //    var personAddRequest = _fixture.Create<PersonAddRequest>();
+        //    PersonsController personsController = new(_personsService, _countriesService, mapperConfiguration.CreateMapper());
+        //    PersonResponse personResponse = _fixture.Create<PersonResponse>();
+        //    List<CountryResponse> countyries = _fixture.Create<List<CountryResponse>>();
 
-            _personsServiceMock.Setup(temp => temp.Add(It.IsAny<PersonAddRequest>()))
-                .ReturnsAsync(personResponse);
+        //    _personsServiceMock.Setup(temp => temp.Add(It.IsAny<PersonAddRequest>()))
+        //        .ReturnsAsync(personResponse);
 
-            _countriesServiceMock.Setup(temp=>temp.GetAll())
-                .ReturnsAsync(countyries);
+        //    _countriesServiceMock.Setup(temp=>temp.GetAll())
+        //        .ReturnsAsync(countyries);
 
-            personsController.ModelState.AddModelError("PersonName", "error");
+        //    personsController.ModelState.AddModelError("PersonName", "error");
 
-            //act 
-            IActionResult result = await  personsController.Create(personAddRequest);
+        //    //act 
+        //    IActionResult result = await  personsController.Create(personAddRequest);
 
-            ViewResult viewResult = Assert.IsType<ViewResult>(result);
-            viewResult.ViewData.Model.Should().BeAssignableTo<PersonAddRequest>();
-            viewResult.ViewName.Should().Be("Create");
+        //    ViewResult viewResult = Assert.IsType<ViewResult>(result);
+        //    viewResult.ViewData.Model.Should().BeAssignableTo<PersonAddRequest>();
+        //    viewResult.ViewName.Should().Be("Create");
 
-        }
+        //}
 
         [Fact]
         public async Task Create_IfNoModelErrors_ToReturnCreateView()

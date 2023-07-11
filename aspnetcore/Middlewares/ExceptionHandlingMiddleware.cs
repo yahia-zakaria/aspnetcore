@@ -37,8 +37,8 @@ namespace aspnetcore.Middlewares
 				{
 					_logger.LogError("ExceptionType: {ExceptionType}, ExceptionMessage: {ExceptionMessage}", ex.GetType().ToString(), ex.Message);
 				}
-				context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-				await context.Response.WriteAsync("Error has been occured");
+
+				throw;
 			}
 		}
 	}
